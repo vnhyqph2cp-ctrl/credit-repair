@@ -1,83 +1,95 @@
-import { NextRequest } from "next/server";
-
-const BASE_URL = process.env.MFSN_BASE_URL!;
-const PARTNER_TOKEN = process.env.MFSN_PARTNER_TOKEN!;
+// app/api/mfsn/enroll/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { mfsnFetch } from "@/lib/mfsnClient";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!BASE_URL || !PARTNER_TOKEN) {
-      return new Response(
-        JSON.stringify({ error: "MFSN config missing" }),
-        { status: 500 }
-      );
-    }
-
     const body = await req.json();
 
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "password",
-      "aid",
-      "mobile",
-      "streetAddress1",
-      "zip",
-      "city",
-      "state",
-      "ssn",
-      "dob",
-      "type",
-      "product"
-    ];
+    const {
+      aid,
+      pid,
+      firstName,
+      lastName,
+      email,
+      password,
+      mobile,
+      streetAddress,
+      zip,
+      city,
+      state,
+      ssn,
+      dob,
+      blackboxCode,
+    } = body;
 
-    const missing = requiredFields.filter((f) => !body[f]);
-    if (missing.length) {
-      return new Response(
-        JSON.stringify({ error: "Missing fields", missing }),
+    if (
+      !aid ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      !password ||
+      !mobile ||
+      !streetAddress ||
+      !zip ||
+      !city ||
+      !state ||
+      !ssn ||
+      !dob ||
+      blackboxCode === undefined
+    ) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Missing required fields: aid, firstName, lastName, email, password, mobile, streetAddress, zip, city, state, ssn, dob, blackboxCode",
+        },
         { status: 400 }
       );
     }
 
-    const product = body.product === "funding" ? "funding" : "credit";
-    const enrollUrl = `${BASE_URL}/api/auth/snapshot/${product}/enroll`;
+    const mfsnBody = {
+      aid,
+      pid,
+      firstName,
+      lastName,
+      email,
+      password,
+      mobile,
+      streetAddress,
+      zip,
+      city,
+      state,
+      ssn,
+      dob,
+      blackboxCode,
+    };
 
-    const enrollRes = await fetch(enrollUrl, {
+    const res = await mfsnFetch("/api/auth/enroll/start", {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${PARTNER_TOKEN}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        password: body.password,
-        aid: body.aid,
-        mobile: body.mobile,
-        streetAddress1: body.streetAddress1,
-        zip: body.zip,
-        city: body.city,
-        state: body.state,
-        ssn: body.ssn,
-        dob: body.dob,
-        type: body.type
-      })
+      body: JSON.stringify(mfsnBody),
     });
 
-    const data = await enrollRes.json();
-
-    if (!enrollRes.ok) {
-      return new Response(
-        JSON.stringify({ error: "Enrollment failed", detail: data }),
-        { status: enrollRes.status }
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("MFSN enroll failed", res.status, text);
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Failed to start enrollment",
+          status: res.status,
+          detail: text,
+        },
+        { status: 400 }
       );
     }
 
-    return new Response(JSON.stringify({ success: true, data }), { status: 200 });
-  } catch (err: any) {
-    return new Response(
-      JSON.stringify({ error: "Server error", detail: err?.message }),
+    const data = await res.json();
+    return NextResponse.json({ ok: true, data });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { ok: false, error: "Server error" },
       { status: 500 }
     );
   }
