@@ -1,0 +1,94 @@
+// File: prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection URL is configured in prisma.config.ts (Prisma 7+)
+}
+
+
+/// Core customer in the 3B ecosystem
+model ThreeBCustomer {
+  threeBId          String             @id @default(cuid())
+  customerId        String             @unique
+  email             String             @unique
+  firstName         String
+  lastName          String
+  billingCustomerId String?            // Stripe or other PSP id
+  ecosystemTier     EcosystemTier      @default(TIER0)
+  createdAt         DateTime           @default(now())
+
+  providerMappings  ProviderMapping[]
+  subscriptions     Subscription[]
+  credits           ThreeBCredit[]
+}
+
+/// Maps a 3B customer to external providers (MFSN, future 3B vendors, etc.)
+model ProviderMapping {
+  id                 String        @id @default(cuid())
+  threeBId           String
+  provider           String        // e.g. "MFSN"
+  externalMemberId   String        // e.g. MFSN member id
+  isPrimary          Boolean       @default(false)
+  affiliateCommission Int          // in cents, e.g. 1100 = $11.00
+  createdAt          DateTime      @default(now())
+
+  customer           ThreeBCustomer @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
+
+  @@index([threeBId])
+  @@index([provider, externalMemberId])
+}
+
+/// Credit Builder and other Boost Club subscriptions
+model Subscription {
+  subscriptionId      String          @id @default(cuid())
+  threeBId            String
+  product             String          // e.g. "3B_CREDIT_BUILDER"
+  planId              String          // e.g. "credit_builder_base"
+  addOns              Json            // e.g. ["dispute_letters"]
+  status              SubscriptionStatus
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+  createdAt           DateTime        @default(now())
+  canceledAt          DateTime?
+
+  customer            ThreeBCustomer  @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
+  creditsApplied      ThreeBCredit[]  @relation("SubscriptionCredits")
+
+  @@index([threeBId])
+  @@index([product, planId])
+}
+
+/// Boost Club credits ledger
+model ThreeBCredit {
+  id            String             @id @default(cuid())
+  threeBId      String
+  amountCents   Int                // positive = grant, negative = consumption
+  source        String             // e.g. "CREDIT_BUILDER_MONTHLY", "CHECKOUT_APPLY"
+  issuedAt      DateTime           @default(now())
+  appliedTo     String?            // subscriptionId or invoice id
+  expiresAt     DateTime?
+
+  customer      ThreeBCustomer     @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
+  subscription  Subscription?      @relation("SubscriptionCredits", fields: [appliedTo], references: [subscriptionId])
+
+  @@index([threeBId])
+  @@index([appliedTo])
+}
+
+enum EcosystemTier {
+  TIER0
+  TIER1
+  TIER2
+  TIER3
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  TRIALING
+}

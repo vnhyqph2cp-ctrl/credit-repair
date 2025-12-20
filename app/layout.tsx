@@ -1,6 +1,11 @@
 // app/layout.tsx
-import './globals.css';
-import Sidebar from '../components/Sidebar';
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "3B Credit Builder",
+  description: "Build credit the smart way with AI-powered monitoring, disputes, and funding roadmap",
+};
 
 export default function RootLayout({
   children,
@@ -8,12 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-[--color-background] text-[--color-text-main]">
-        <div className="flex min-h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-auto p-6">{children}</main>
-        </div>
+    <html lang="en">
+      <body className="bg-black antialiased">
+        {children}
       </body>
     </html>
   );

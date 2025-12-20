@@ -1,194 +1,109 @@
-// app/dashboard/page.tsx
-"use client";
+// File: app/dashboard/page.tsx
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-
-type Bureau = { name: string; score: number; change30d: number };
-
-type Readiness = {
-  status: string;
-  scoreBand: string;
-  color: string;
-  note: string;
+type Score = {
+  bureau: 'TU' | 'EQF' | 'EXP';
+  score: number;
+  pulledAt: string;
 };
 
-const readinessDefaults: Readiness = {
-  status: "BUILDING",
-  scoreBand: "620–659",
-  color: "yellow",
-  note: "Improve to 660+ to unlock better funding offers.",
+type Health = {
+  customerId: string;
+  overallScore: number;
 };
 
-export default function DashboardPage() {
-  const [loading, setLoading] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [bureaus, setBureaus] = useState<Bureau[]>([
-    { name: "Experian", score: 0, change30d: 0 },
-    { name: "Equifax", score: 0, change30d: 0 },
-    { name: "TransUnion", score: 0, change30d: 0 },
+async function get3BReport(customerId: string): Promise<Score[] | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+
+    const res = await fetch(`${baseUrl}/api/3b/reports/${customerId}`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.data?.report?.scores ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function get3BHealth(customerId: string): Promise<Health | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+
+    const res = await fetch(`${baseUrl}/api/3b/health/${customerId}`, {
+      cache: 'no-store',
+    });
+
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.data?.health ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function DashboardPage() {
+  const customerId = 'cust_test_123';
+
+  const [scores, health] = await Promise.all([
+    get3BReport(customerId),
+    get3BHealth(customerId),
   ]);
-  const [readiness, setReadiness] =
-    useState<Readiness>(readinessDefaults);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch("/api/credit-summary");
-        if (!res.ok) throw new Error("Failed to load credit summary");
-        const data = await res.json();
+  const avg =
+    scores && scores.length
+      ? Math.round(
+          scores.reduce((sum, s) => sum + s.score, 0) / scores.length
+        )
+      : 0;
 
-        setProgress(data.progressPercent ?? 32);
-        setBureaus(
-          data.bureaus ?? [
-            { name: "Experian", score: 682, change30d: 12 },
-            { name: "Equifax", score: 682, change30d: 12 },
-            { name: "TransUnion", score: 682, change30d: 12 },
-          ]
-        );
-        setReadiness(data.mfsnReadiness ?? readinessDefaults);
-      } catch (e) {
-        console.error(e);
-        // fallback demo data
-        setProgress(32);
-        setBureaus([
-          { name: "Experian", score: 682, change30d: 12 },
-          { name: "Equifax", score: 682, change30d: 12 },
-          { name: "TransUnion", score: 682, change30d: 12 },
-        ]);
-        setReadiness(readinessDefaults);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
-  }, []);
-
-  const quickLinks = [
-    { name: "Credit Monitoring", href: "/dashboard/credit-monitoring" },
-    { name: "Disputes & AI Letters", href: "/dashboard/disputes" },
-    { name: "Credit Builder Plan", href: "/dashboard/credit-builder" },
-    { name: "Funding Path (MFSN)", href: "/dashboard/funding-path" },
-  ];
+  // Placeholder until you derive real 30‑day change from history
+  const delta = 24;
+  const deltaLabel = `${delta >= 0 ? '+' : ''}${delta} points in last 30 days`;
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-white">
-            Your 3B Credit Builder Dashboard
-          </h1>
-          <p className="text-sm text-[--color-text-muted]">
-            Track your 3‑bureau progress, monitoring, and funding
-            readiness in one place.
+    <main className="mx-auto w-full max-w-6xl px-6 py-8 space-y-6">
+      {/* Top summary */}
+      <section className="grid gap-4 md:grid-cols-[2fr,1fr]">
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-400 mb-2">
+            Credit summary
+          </p>
+          <p className="text-sm text-slate-400 mb-1">3B average score</p>
+          <p className="text-3xl font-semibold text-emerald-300">
+            {avg || '--'}
+          </p>
+          <p className="text-[11px] text-emerald-400 mt-1">
+            {scores ? deltaLabel : 'No recent change data'}
           </p>
         </div>
 
-        <Link
-          href="/"
-          className="rounded-md border border-[--color-border] px-3 py-1 text-xs text-[--color-text-muted] hover:bg-[--color-secondary]"
-        >
-          Back to landing
-        </Link>
-      </header>
-
-      {/* Score + progress row */}
-      <section className="grid gap-4 md:grid-cols-4">
-        {/* Progress card */}
-        <div className="col-span-1 rounded-xl border border-[--color-border] bg-[--color-secondary] p-4 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-          <h2 className="text-sm font-medium text-[--color-text-muted]">
-            Rebuild progress
-          </h2>
-          <p className="mt-3 text-3xl font-bold text-[--color-primary]">
-            {loading ? "…" : `${progress}%`}
-          </p>
-          <div className="mt-3 h-2 w-full rounded-full bg-[--color-border] overflow-hidden">
-            <div
-              className="h-2 rounded-full bg-gradient-to-r from-[--color-primary] to-[#34D399] transition-all"
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
-          </div>
-          <p className="mt-2 text-xs text-[--color-text-muted]">
-            On track toward your target score and funding goals.
-          </p>
-        </div>
-
-        {/* Bureau cards */}
-        {bureaus.map((bureau) => (
-          <div
-            key={bureau.name}
-            className="rounded-xl border border-[--color-border] bg-[--color-secondary] p-4 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
-          >
-            <h2 className="text-sm font-medium text-[--color-text-muted]">
-              {bureau.name}
-            </h2>
-            <p className="mt-2 text-3xl font-bold text-[--color-primary]">
-              {loading ? "…" : bureau.score}
-            </p>
-            <p className="mt-1 text-xs text-[--color-highlight]">
-              {loading ? "" : `+${bureau.change30d} in last 30 days`}
-            </p>
-          </div>
-        ))}
-      </section>
-
-      {/* Funding readiness card */}
-      <section className="rounded-xl border border-[--color-border] bg-[--color-secondary] p-4">
-        <h2 className="text-sm font-semibold text-white">
-          MFSN Funding Readiness
-        </h2>
-        <p className="mt-2 text-sm text-[--color-text-muted]">
-          Status:{" "}
-          <span className="font-semibold text-[--color-primary]">
-            {readiness.status}
-          </span>{" "}
-          ({readiness.scoreBand})
-        </p>
-        <p className="mt-1 text-xs text-[--color-text-muted]">
-          {readiness.note}
-        </p>
-        <div className="mt-3 h-2 w-full rounded-full bg-[--color-border] overflow-hidden">
-          <div
-            className={`h-2 w-1/2 rounded-full ${
-              readiness.color === "green"
-                ? "bg-emerald-500"
-                : readiness.color === "yellow"
-                ? "bg-amber-400"
-                : "bg-rose-500"
-            }`}
-          />
+        <div className="rounded-2xl border border-slate-800 bg-slate-950/80 p-5 space-y-2 text-xs text-slate-300">
+          <p className="font-semibold text-slate-100">Next actions</p>
+          <p>- Confirm MyFreeScoreNow connection.</p>
+          <p>- Review monitoring alerts.</p>
+          <p>- Start first dispute batch.</p>
         </div>
       </section>
 
-      {/* Today’s moves */}
-      <section className="rounded-xl border border-[--color-border] bg-[--color-secondary] p-4">
-        <h2 className="text-sm font-semibold text-white">
-          Today’s 3 Moves
-        </h2>
-        <ul className="mt-2 space-y-1 text-sm text-[--color-text-muted]">
-          <li>• Confirm MyFreeScoreNow monitoring is connected</li>
-          <li>• Review negative items flagged for dispute</li>
-          <li>• Add a positive tradeline or builder account to your plan</li>
-        </ul>
+      {/* Lower cards */}
+      <section className="grid gap-4 md:grid-cols-3 text-xs text-slate-300">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+          <p className="font-semibold text-emerald-300 mb-1">Monitoring</p>
+          <p>Score changes, alerts, utilization, and new inquiries.</p>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+          <p className="font-semibold text-cyan-300 mb-1">Disputes</p>
+          <p>Queued letters and items in progress by bureau.</p>
+        </div>
+        <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
+          <p className="font-semibold text-fuchsia-300 mb-1">Funding path</p>
+          <p>Tracked toward target scores and offer tiers.</p>
+        </div>
       </section>
-
-      {/* Quick link tiles */}
-      <section className="grid gap-6 md:grid-cols-4">
-        {quickLinks.map((tile) => (
-          <Link
-            key={tile.href}
-            href={tile.href}
-            className="rounded-xl border border-[--color-border] bg-[--color-secondary] p-6 text-sm transition-shadow hover:shadow-[0_0_10px_rgba(254,194,124,0.3)]"
-          >
-            <div className="font-semibold text-white">{tile.name}</div>
-            <div className="mt-1 text-xs text-[--color-text-muted]">
-              Open section →
-            </div>
-          </Link>
-        ))}
-      </section>
-    </div>
+    </main>
   );
 }
