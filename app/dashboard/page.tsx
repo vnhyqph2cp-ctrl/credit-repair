@@ -1,10 +1,9 @@
-import { BADGES } from "./components/badges";
-import { BadgePicker } from "./components/BadgePicker";
+// app/dashboard/page.tsx
+
 import NeonGauge from "./components/NeonGauge";
 
-// ...
-<NeonGauge value={avg} label="3B Average Score" sublabel="TransUnion • Equifax • Experian" />
-
+type Score = { bureau: "TU" | "EQF" | "EXP"; score: number; pulledAt: string };
+type Health = { customerId: string; overallScore: number };
 
 async function get3BReport(customerId: string): Promise<Score[] | null> {
   try {
@@ -35,7 +34,7 @@ function clamp(n: number, min: number, max: number) {
 }
 
 function scoreToPct(score: number) {
-  // Credit range baseline 300-850
+  // Credit baseline 300–850
   return clamp(((score - 300) / (850 - 300)) * 100, 0, 100);
 }
 
@@ -69,7 +68,7 @@ function toneClasses(tone: "slate" | "lime" | "cyan" | "purple" | "fuchsia") {
 }
 
 export default async function DashboardPage() {
-  // Beta placeholder — later this comes from Supabase Auth customer record
+  // TODO: replace with Supabase/Auth customer record later
   const customerId = "cust_test_123";
 
   const [scores, health] = await Promise.all([get3BReport(customerId), get3BHealth(customerId)]);
@@ -78,17 +77,13 @@ export default async function DashboardPage() {
     scores && scores.length ? Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length) : 0;
 
   const pct = avg ? scoreToPct(avg) : 0;
-
-  // If you have a real delta somewhere later, plug it here.
-  // For now we show "Latest Snapshot" instead of fake numbers.
   const status = statusFromScore(avg);
-
-  const gradId = `bbGradient-${customerId}`;
-  const glowId = `bbGlow-${customerId}`;
-
   const hasSnapshot = !!(scores && scores.length);
 
-  const nextAction = hasSnapshot ? "Review disputable items and start Round 1." : "Connect MyFreeScoreNow to pull your Snapshot.";
+  const nextAction = hasSnapshot
+    ? "Review disputable items and start Round 1."
+    : "Connect MyFreeScoreNow to pull your Snapshot.";
+
   const nextHref = hasSnapshot ? "/dashboard/disputes" : "/go/mfsn";
   const nextCta = hasSnapshot ? "Go to Disputes →" : "Connect MyFreeScoreNow →";
 
@@ -98,7 +93,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-black via-slate-950 to-black text-slate-100">
-      {/* Neon ambient background (safe + contained) */}
+      {/* Ambient neon background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
         <div className="absolute -top-20 right-[-120px] h-[520px] w-[520px] rounded-full bg-fuchsia-500/10 blur-3xl" />
@@ -157,9 +152,9 @@ export default async function DashboardPage() {
       </header>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 py-8 md:py-12 space-y-8">
-        {/* HERO: Score room */}
+        {/* HERO */}
         <section className="relative rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900/70 to-black/80 p-6 md:p-10 lg:p-12 shadow-2xl overflow-hidden">
-          {/* Corner neon lines */}
+          {/* Neon frame lines */}
           <div className="pointer-events-none absolute inset-0 opacity-60">
             <div className="absolute top-0 left-0 h-[1px] w-full bg-gradient-to-r from-cyan-400/30 via-transparent to-fuchsia-400/30" />
             <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-teal-400/25 to-transparent" />
@@ -168,67 +163,25 @@ export default async function DashboardPage() {
           </div>
 
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-            {/* Left: Big meter */}
+            {/* Left: Gauge + Next Action */}
             <div className="text-center">
               <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-slate-400 mb-5">
                 Credit Summary
               </p>
 
-              {/* Half-ring neon gauge (logo-style) */}
-              <div className="relative mx-auto w-[320px] h-[200px] sm:w-[420px] sm:h-[260px] lg:w-[520px] lg:h-[320px]">
-                <svg viewBox="0 0 1000 600" className="w-full h-full">
-                  <defs>
-                    <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#06b6d4" />
-                      <stop offset="55%" stopColor="#14b8a6" />
-                      <stop offset="100%" stopColor="#d946ef" />
-                    </linearGradient>
-
-                    <filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">
-                      <feGaussianBlur stdDeviation="10" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-
-                  {/* Track */}
-                  <path
-                    d="M 150 450 A 350 350 0 0 1 850 450"
-                    fill="none"
-                    stroke="rgba(148,163,184,0.18)"
-                    strokeWidth="90"
-                    strokeLinecap="round"
-                  />
-
-                  {/* Progress */}
-                  <path
-                    d="M 150 450 A 350 350 0 0 1 850 450"
-                    fill="none"
-                    stroke={`url(#${gradId})`}
-                    strokeWidth="90"
-                    strokeLinecap="round"
-                    pathLength={100}
-                    strokeDasharray={100}
-                    strokeDashoffset={100 - pct}
-                    filter={`url(#${glowId})`}
-                  />
-                </svg>
-
-                {/* Center content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-10">
-                  <div className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-br from-cyan-400 via-teal-300 to-fuchsia-400 bg-clip-text text-transparent">
-                    {avg || "--"}
-                  </div>
-                  <div className="mt-2 text-xs sm:text-sm text-slate-400">3-bureau average score</div>
-                  <div className="mt-3 text-[11px] sm:text-xs text-slate-500">
-                    Latest available snapshot • Scores update as data refreshes
-                  </div>
+              {/* ✅ NeonGauge is used INSIDE the component (no more avg errors) */}
+              <div className="mx-auto max-w-[560px]">
+                <NeonGauge
+                  value={avg || 0}
+                  label={avg ? `${avg}` : "--"}
+                  sublabel="3-bureau average score"
+                />
+                <div className="mt-3 text-[11px] sm:text-xs text-slate-500">
+                  Latest available snapshot • Scores update as data refreshes
                 </div>
               </div>
 
-              {/* Next Action card */}
+              {/* Next Action */}
               <div className="mt-6 mx-auto max-w-xl">
                 <div className="rounded-2xl border border-slate-800/60 bg-black/30 p-4 md:p-5 text-left">
                   <div className="flex items-center justify-between gap-3">
@@ -259,9 +212,9 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            {/* Right: Bureau scores + Journey */}
+            {/* Right: Mission + Bureau */}
             <div className="space-y-6">
-              {/* Journey path */}
+              {/* Mission Path */}
               <div className="rounded-2xl border border-slate-800/60 bg-black/25 p-5 md:p-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg md:text-xl font-black">Your Mission Path</h2>
@@ -273,8 +226,7 @@ export default async function DashboardPage() {
                     <div className="text-xs font-black text-slate-300">1) Snapshot</div>
                     <div className="mt-2 text-sm text-slate-400">Pull your scores & report data</div>
                     <div className="mt-3 text-xs font-bold text-slate-200">
-                      Status:{" "}
-                      <span className={step1 === "Ready" ? "text-cyan-300" : "text-slate-500"}>{step1}</span>
+                      Status: <span className={step1 === "Ready" ? "text-cyan-300" : "text-slate-500"}>{step1}</span>
                     </div>
                   </div>
 
@@ -282,8 +234,7 @@ export default async function DashboardPage() {
                     <div className="text-xs font-black text-slate-300">2) Disputes</div>
                     <div className="mt-2 text-sm text-slate-400">Plan rounds & generate letters</div>
                     <div className="mt-3 text-xs font-bold text-slate-200">
-                      Status:{" "}
-                      <span className={step2 === "Ready" ? "text-purple-300" : "text-slate-500"}>{step2}</span>
+                      Status: <span className={step2 === "Ready" ? "text-purple-300" : "text-slate-500"}>{step2}</span>
                     </div>
                   </div>
 
@@ -298,7 +249,7 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              {/* Bureau cards */}
+              {/* Bureau Scores */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg md:text-xl font-black">Bureau Scores</h3>
@@ -347,6 +298,23 @@ export default async function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {/* Progress strip */}
+              <div className="rounded-2xl border border-slate-800/60 bg-black/25 p-5 md:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-black text-slate-200">Progress Toward 700+</div>
+                  <div className="text-xs text-slate-500">{pct ? `${Math.round(pct)}%` : "0%"}</div>
+                </div>
+                <div className="mt-3 h-3 rounded-full bg-slate-800/70 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 via-teal-400 to-fuchsia-500"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="mt-2 text-xs text-slate-500">
+                  The bar is based on the classic 300–850 score scale (not a guarantee).
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -388,7 +356,7 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* Feature tiles (Monitoring / Disputes / Funding) */}
+        {/* Feature tiles */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           <a
             href="/dashboard/monitoring"
@@ -418,7 +386,7 @@ export default async function DashboardPage() {
           </a>
         </section>
 
-        {/* Compliance / trust footer (keeps it legit without killing vibe) */}
+        {/* Compliance / trust footer */}
         <section className="rounded-3xl border border-slate-800/60 bg-black/25 p-6 md:p-8">
           <div className="text-sm text-slate-300 font-black">Heads up (quick & real)</div>
           <ul className="mt-3 space-y-2 text-sm text-slate-400">
