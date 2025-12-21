@@ -4,7 +4,11 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black text-slate-100">
       <header className="sticky top-0 z-50 border-b border-slate-800/50 bg-black/90 backdrop-blur-xl shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <img src="https://drive.google.com/uc?export=view&id=1kHYVl3q570j4gFBnHBza_i4s6rxsS7yg" alt="3B Credit Builder" className="h-14 w-auto hover:scale-105 transition-transform" />
+<img
+  src="/brand/logo.png"
+  alt="3B Credit Builder"
+  className="h-14 w-auto hover:scale-105 transition-transform"
+/>
           <nav className="flex items-center gap-8">
             <a href="#pricing" className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition">Pricing</a>
             <a href="#comparison" className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition">Why 3B?</a>

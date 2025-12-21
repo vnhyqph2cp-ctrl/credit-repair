@@ -10,11 +10,15 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-4">
           <div className="flex items-center gap-3">
             {/* Prefer local asset later: /brand/3B_Credit_Logo.png */}
-            <img
-              src="https://drive.google.com/uc?export=view&id=1kHYVl3q570j4gFBnHBza_i4s6rxsS7yg"
+            
+<img
+  src="/brand/logo.png"
+  alt="3B Credit Builder"
+  className="h-14 w-auto hover:scale-105 transition-transform"
+/>
               alt="3B Credit Builder"
               className="h-11 sm:h-14 w-auto hover:scale-105 transition-transform"
-            />
+            /
             <div className="hidden md:block leading-tight">
               <div className="text-sm font-extrabold tracking-wide text-white">
                 3B Credit Builder
