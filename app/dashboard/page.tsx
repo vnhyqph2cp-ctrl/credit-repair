@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase-server";
 import { getDashboardState } from "@/lib/dashboard";
+import { calculateFundingReadiness } from "@/lib/funding/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,17 @@ export default async function DashboardPage() {
   }
 
   const state = await getDashboardState(user.id);
+
+  // Calculate FRS if snapshot exists (safe - won't break if it fails)
+  let frsData = null;
+  if (state.hasReport) {
+    try {
+      frsData = await calculateFundingReadiness(user.id);
+    } catch (err) {
+      console.error("[Dashboard] FRS calculation failed:", err);
+      // Graceful degradation - dashboard still works
+    }
+  }
 
   // No snapshot / MFSN not connected yet
   if (!state.hasReport) {
@@ -43,7 +55,7 @@ export default async function DashboardPage() {
             </div>
             <p className="text-slate-400 mt-2 text-sm">
               We securely pull your Snapshot and scores, then unlock your personalized
-              dashboard with analysis, dispute planning, and funding readiness — all in
+              dashboard with analysis, dispute planning, and funding readiness – all in
               a calm, guided experience.
             </p>
           </section>
@@ -55,6 +67,19 @@ export default async function DashboardPage() {
   // Snapshot/report exists
   const plan = state.plan as "basic" | "analyzer" | "welcome" | "ultimate";
 
+  // Band colors
+  const bandColors = {
+    BUILD: "from-orange-500 to-red-500",
+    ALMOST: "from-yellow-500 to-orange-500",
+    READY: "from-green-500 to-emerald-500",
+  };
+
+  const bandText = {
+    BUILD: "Building Foundation",
+    ALMOST: "Almost Ready",
+    READY: "Funding Ready",
+  };
+
   return (
     <main className="min-h-screen bg-black text-white p-6 space-y-6">
       {/* Scores / Snapshot summary */}
@@ -65,6 +90,59 @@ export default async function DashboardPage() {
           • EXP: {state.report?.score_ex ?? "--"}
         </div>
       </section>
+
+      {/* FRS Display - shown for all users with snapshot */}
+      {frsData && (
+        <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
+          <div className="font-black text-lg">Funding Readiness</div>
+          
+          <div className="mt-4 flex items-center gap-6">
+            {/* FRS Score Circle */}
+            <div className="relative w-24 h-24">
+              <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${bandColors[frsData.band]} opacity-20`}></div>
+              <div className="absolute inset-2 rounded-full bg-black flex items-center justify-center">
+                <span className="text-3xl font-black">{frsData.frs}</span>
+              </div>
+            </div>
+
+            {/* Band & Description */}
+            <div className="flex-1">
+              <div className={`inline-block px-3 py-1 rounded-full bg-gradient-to-r ${bandColors[frsData.band]} text-black font-black text-sm`}>
+                {bandText[frsData.band]}
+              </div>
+              <p className="text-slate-400 mt-2 text-sm">
+                {frsData.band === "BUILD" && "Focus on credit building and reducing utilization to improve your score."}
+                {frsData.band === "ALMOST" && "You're close! A few improvements will unlock better funding options."}
+                {frsData.band === "READY" && "Your profile is strong. Explore personalized funding offers below."}
+              </p>
+            </div>
+          </div>
+
+          {/* Breakdown */}
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div className="rounded-lg bg-slate-900/60 p-3">
+              <div className="text-xs text-slate-400">Credit</div>
+              <div className="font-black text-lg">{frsData.breakdown.credit}/30</div>
+            </div>
+            <div className="rounded-lg bg-slate-900/60 p-3">
+              <div className="text-xs text-slate-400">Utilization</div>
+              <div className="font-black text-lg">{frsData.breakdown.utilization}/25</div>
+            </div>
+            <div className="rounded-lg bg-slate-900/60 p-3">
+              <div className="text-xs text-slate-400">Clean</div>
+              <div className="font-black text-lg">{frsData.breakdown.derogatories}/25</div>
+            </div>
+            <div className="rounded-lg bg-slate-900/60 p-3">
+              <div className="text-xs text-slate-400">Accounts</div>
+              <div className="font-black text-lg">{frsData.breakdown.accounts}/10</div>
+            </div>
+            <div className="rounded-lg bg-slate-900/60 p-3">
+              <div className="text-xs text-slate-400">Club</div>
+              <div className="font-black text-lg">{frsData.breakdown.club}/10</div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {plan === "basic" && (
         <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
@@ -153,14 +231,6 @@ export default async function DashboardPage() {
                 Send via LetterStream →
               </button>
             </div>
-          </section>
-
-          <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
-            <div className="font-black">Funding / 700+ Section</div>
-            <p className="text-slate-400 mt-2">
-              Funding readiness, limits, and 700+ strategy will be surfaced here once
-              your Snapshot and disputes are on track.
-            </p>
           </section>
         </>
       )}
