@@ -1,17 +1,6 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
-}
+  // leave empty for now – no `turbopack` or `experimental.turbo`
+};
 
-module.exports = nextConfig
-
-
-
+module.exports = nextConfig;

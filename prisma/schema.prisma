@@ -1,94 +1,102 @@
-// File: prisma/schema.prisma
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  // Connection URL is configured in prisma.config.ts (Prisma 7+)
+
+model Customer {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  name             String?
+  phone            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // 3B system fields
+  mfsnMemberId     String?  @unique
+  currentPlanTier  String?  @default("basic") // basic, analyzer, welcome, ultimate
+  stripeCustomerId String?  @unique
+
+  // Credit scores
+  scoreTu          Int?
+  scoreEq          Int?
+  scoreEx          Int?
+  scoreAvg         Int?
+
+  // Tracking
+  lastReportDate   DateTime?
+  nextRoundDate    DateTime?
+  lastRoundSent    String?  // "round1", "round2", etc.
+  disputableCount  Int?     @default(0)
+  lastAction       String?
+
+  snapshots        Snapshot[]
+  disputePlans     DisputePlan[]
+  letters          Letter[]
 }
 
+model Snapshot {
+  id            String   @id @default(uuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-/// Core customer in the 3B ecosystem
-model ThreeBCustomer {
-  threeBId          String             @id @default(cuid())
-  customerId        String             @unique
-  email             String             @unique
-  firstName         String
-  lastName          String
-  billingCustomerId String?            // Stripe or other PSP id
-  ecosystemTier     EcosystemTier      @default(TIER0)
-  createdAt         DateTime           @default(now())
+  // Raw data from MFSN/Epic
+  rawData       Json
+  extractedJson Json?   // Normalized 3B Standard format
 
-  providerMappings  ProviderMapping[]
-  subscriptions     Subscription[]
-  credits           ThreeBCredit[]
+  // Quick access scores
+  scoreTu       Int?
+  scoreEq       Int?
+  scoreEx       Int?
+
+  status        String   @default("pending") // pending, ready, imported
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([customerId])
 }
 
-/// Maps a 3B customer to external providers (MFSN, future 3B vendors, etc.)
-model ProviderMapping {
-  id                 String        @id @default(cuid())
-  threeBId           String
-  provider           String        // e.g. "MFSN"
-  externalMemberId   String        // e.g. MFSN member id
-  isPrimary          Boolean       @default(false)
-  affiliateCommission Int          // in cents, e.g. 1100 = $11.00
-  createdAt          DateTime      @default(now())
+model DisputePlan {
+  id           String   @id @default(uuid())
+  customerId   String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  customer           ThreeBCustomer @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
+  // Analyzer output + multi-round plan
+  analyzerData Json
+  planData     Json
 
-  @@index([threeBId])
-  @@index([provider, externalMemberId])
+  currentRound Int      @default(1)
+  totalRounds  Int      @default(3)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([customerId])
 }
 
-/// Credit Builder and other Boost Club subscriptions
-model Subscription {
-  subscriptionId      String          @id @default(cuid())
-  threeBId            String
-  product             String          // e.g. "3B_CREDIT_BUILDER"
-  planId              String          // e.g. "credit_builder_base"
-  addOns              Json            // e.g. ["dispute_letters"]
-  status              SubscriptionStatus
-  currentPeriodStart  DateTime
-  currentPeriodEnd    DateTime
-  createdAt           DateTime        @default(now())
-  canceledAt          DateTime?
+model Letter {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
-  customer            ThreeBCustomer  @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
-  creditsApplied      ThreeBCredit[]  @relation("SubscriptionCredits")
+  round      Int      // 1, 2, 3, etc.
+  bureau     String   // TU, EQ, EX, or "furnisher"
+  style      String   @default("general") // general, daraine, smitty
 
-  @@index([threeBId])
-  @@index([product, planId])
-}
+  content    String   @db.Text
+  status     String   @default("draft") // draft, sent, response_received
 
-/// Boost Club credits ledger
-model ThreeBCredit {
-  id            String             @id @default(cuid())
-  threeBId      String
-  amountCents   Int                // positive = grant, negative = consumption
-  source        String             // e.g. "CREDIT_BUILDER_MONTHLY", "CHECKOUT_APPLY"
-  issuedAt      DateTime           @default(now())
-  appliedTo     String?            // subscriptionId or invoice id
-  expiresAt     DateTime?
+  sentAt     DateTime?
+  responseAt DateTime?
 
-  customer      ThreeBCustomer     @relation(fields: [threeBId], references: [threeBId], onDelete: Cascade)
-  subscription  Subscription?      @relation("SubscriptionCredits", fields: [appliedTo], references: [subscriptionId])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  @@index([threeBId])
-  @@index([appliedTo])
-}
-
-enum EcosystemTier {
-  TIER0
-  TIER1
-  TIER2
-  TIER3
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  PAST_DUE
-  TRIALING
+  @@index([customerId, round])
 }
