@@ -38,8 +38,8 @@ export default async function DashboardPage() {
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl font-black">Connect MyFreeScoreNow</h1>
           <p className="text-slate-300 mt-2">
-            Connect MyFreeScoreNow to pull your Snapshot and scores into 3B Credit
-            Builder.
+            Connect MyFreeScoreNow to pull your Snapshot and scores into 3B
+            Credit Builder.
           </p>
 
           <a
@@ -54,9 +54,9 @@ export default async function DashboardPage() {
               What happens after you connect
             </div>
             <p className="text-slate-400 mt-2 text-sm">
-              We securely pull your Snapshot and scores, then unlock your personalized
-              dashboard with analysis, dispute planning, and funding readiness – all in
-              a calm, guided experience.
+              We securely pull your Snapshot and scores, then unlock your
+              personalized dashboard with analysis, dispute planning, and
+              funding readiness – all in a calm, guided experience.
             </p>
           </section>
         </div>
@@ -86,20 +86,36 @@ export default async function DashboardPage() {
       <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
         <div className="text-lg font-black">Your Snapshot is Ready</div>
         <div className="mt-3 text-slate-300">
-          TU: {state.report?.score_tu ?? "--"} • EQF: {state.report?.score_eq ?? "--"}{" "}
-          • EXP: {state.report?.score_ex ?? "--"}
+          TU: {state.report?.score_tu ?? "--"} • EQF:{" "}
+          {state.report?.score_eq ?? "--"} • EXP:{" "}
+          {state.report?.score_ex ?? "--"}
         </div>
+      </section>
+
+      {/* 3B value explainer */}
+      <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
+        <div className="font-black text-base">
+          What 3B adds beyond monitoring
+        </div>
+        <p className="text-slate-400 mt-2 text-sm">
+          MyFreeScoreNow shows you your 3‑bureau scores and alerts. 3B turns
+          that data into a step‑by‑step plan: analysis of what hurts you most,
+          dispute options, and a funding readiness score so you always know
+          your next move.
+        </p>
       </section>
 
       {/* FRS Display - shown for all users with snapshot */}
       {frsData && (
         <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
           <div className="font-black text-lg">Funding Readiness</div>
-          
+
           <div className="mt-4 flex items-center gap-6">
             {/* FRS Score Circle */}
             <div className="relative w-24 h-24">
-              <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${bandColors[frsData.band]} opacity-20`}></div>
+              <div
+                className={`absolute inset-0 rounded-full bg-gradient-to-br ${bandColors[frsData.band]} opacity-20`}
+              ></div>
               <div className="absolute inset-2 rounded-full bg-black flex items-center justify-center">
                 <span className="text-3xl font-black">{frsData.frs}</span>
               </div>
@@ -107,13 +123,18 @@ export default async function DashboardPage() {
 
             {/* Band & Description */}
             <div className="flex-1">
-              <div className={`inline-block px-3 py-1 rounded-full bg-gradient-to-r ${bandColors[frsData.band]} text-black font-black text-sm`}>
+              <div
+                className={`inline-block px-3 py-1 rounded-full bg-gradient-to-r ${bandColors[frsData.band]} text-black font-black text-sm`}
+              >
                 {bandText[frsData.band]}
               </div>
               <p className="text-slate-400 mt-2 text-sm">
-                {frsData.band === "BUILD" && "Focus on credit building and reducing utilization to improve your score."}
-                {frsData.band === "ALMOST" && "You're close! A few improvements will unlock better funding options."}
-                {frsData.band === "READY" && "Your profile is strong. Explore personalized funding offers below."}
+                {frsData.band === "BUILD" &&
+                  "Focus on credit building and reducing utilization to improve your score."}
+                {frsData.band === "ALMOST" &&
+                  "You're close! A few improvements will unlock better funding options."}
+                {frsData.band === "READY" &&
+                  "Your profile is strong. Explore personalized funding offers below."}
               </p>
             </div>
           </div>
@@ -122,23 +143,33 @@ export default async function DashboardPage() {
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3">
             <div className="rounded-lg bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Credit</div>
-              <div className="font-black text-lg">{frsData.breakdown.credit}/30</div>
+              <div className="font-black text-lg">
+                {frsData.breakdown.credit}/30
+              </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Utilization</div>
-              <div className="font-black text-lg">{frsData.breakdown.utilization}/25</div>
+              <div className="font-black text-lg">
+                {frsData.breakdown.utilization}/25
+              </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Clean</div>
-              <div className="font-black text-lg">{frsData.breakdown.derogatories}/25</div>
+              <div className="font-black text-lg">
+                {frsData.breakdown.derogatories}/25
+              </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Accounts</div>
-              <div className="font-black text-lg">{frsData.breakdown.accounts}/10</div>
+              <div className="font-black text-lg">
+                {frsData.breakdown.accounts}/10
+              </div>
             </div>
             <div className="rounded-lg bg-slate-900/60 p-3">
               <div className="text-xs text-slate-400">Club</div>
-              <div className="font-black text-lg">{frsData.breakdown.club}/10</div>
+              <div className="font-black text-lg">
+                {frsData.breakdown.club}/10
+              </div>
             </div>
           </div>
         </section>
@@ -148,8 +179,8 @@ export default async function DashboardPage() {
         <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
           <div className="font-black">Upgrade to see your AI analysis</div>
           <p className="text-slate-400 mt-2">
-            Analysis, dispute plan, and letters are locked on Basic. Upgrade to unlock a
-            guided dispute strategy built on your Snapshot.
+            Analysis, dispute plan, and letters are locked on Basic. Upgrade to
+            unlock a guided dispute strategy built on your Snapshot.
           </p>
           <a
             className="inline-flex mt-4 rounded-full border border-cyan-400/40 px-5 py-2 font-black text-cyan-200"
@@ -187,16 +218,16 @@ export default async function DashboardPage() {
           <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="font-black">Analysis</div>
             <p className="text-slate-400 mt-2">
-              Your Snapshot has been processed. This section will summarize what is most
-              important to dispute first.
+              Your Snapshot has been processed. This section will summarize what
+              is most important to dispute first.
             </p>
           </section>
 
           <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="font-black">Generate Plan</div>
             <p className="text-slate-400 mt-2">
-              When enabled, this will build your dispute timeline and rounds based on
-              your Snapshot and goals.
+              When enabled, this will build your dispute timeline and rounds
+              based on your Snapshot and goals.
             </p>
             <button className="mt-4 rounded-full bg-cyan-500/15 border border-cyan-400/30 px-5 py-2 font-black text-cyan-200">
               Generate Plan →
@@ -206,7 +237,8 @@ export default async function DashboardPage() {
           <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="font-black">Letters</div>
             <p className="text-slate-400 mt-2">
-              Download-only letters will appear here as your disputes are prepared.
+              Download-only letters will appear here as your disputes are
+              prepared.
             </p>
           </section>
         </>
@@ -217,7 +249,8 @@ export default async function DashboardPage() {
           <section className="rounded-2xl border border-slate-800 bg-slate-950/40 p-5">
             <div className="font-black">Analysis + Plan</div>
             <p className="text-slate-400 mt-2">
-              Your analysis and dispute roadmap are fully unlocked for this account.
+              Your analysis and dispute roadmap are fully unlocked for this
+              account.
             </p>
           </section>
 
