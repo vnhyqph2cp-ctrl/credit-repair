@@ -1,41 +1,285 @@
-const mfsnSnapshotUrl = "https://myfreescorenow.com/en/creditsnapshot/user/register/6153?source=default";
+// app/page.tsx
+const mfsnSnapshotUrl =
+  "https://myfreescorenow.com/en/creditsnapshot/user/register/6153?source=default";
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black text-slate-100">
+      {/* Header */}
       <header className="sticky top-0 z-50 border-b border-slate-800/50 bg-black/90 backdrop-blur-xl shadow-lg">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-<img
-  src="/brand/logo.png"
-  alt="3B Credit Builder"
-  className="h-14 w-auto hover:scale-105 transition-transform"
-/>
+          <img
+            src="/brand/logo.png"
+            alt="3B Credit Builder"
+            className="h-14 w-auto hover:scale-105 transition-transform"
+          />
           <nav className="flex items-center gap-8">
-            <a href="#pricing" className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition">Pricing</a>
-            <a href="#comparison" className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition">Why 3B?</a>
-            <a href="/dashboard" className="rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-7 py-3 text-sm font-bold text-black shadow-lg hover:scale-105 transition-all">Dashboard</a>
+            <a
+              href="#pricing"
+              className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition"
+            >
+              Pricing
+            </a>
+            <a
+              href="#comparison"
+              className="text-sm font-semibold text-slate-300 hover:text-cyan-400 transition"
+            >
+              Why 3B?
+            </a>
+            <a
+              href="/dashboard"
+              className="rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-7 py-3 text-sm font-bold text-black shadow-lg hover:scale-105 transition-all"
+            >
+              Dashboard
+            </a>
           </nav>
         </div>
       </header>
+
+      {/* Hero */}
       <section className="relative overflow-hidden py-32 md:py-40">
-        <div className="absolute top-0 left-0 w-[700px] h-[700px] bg-cyan-500/30 rounded-full blur-[150px] animate-pulse" />
-        <div className="absolute top-60 right-0 w-[800px] h-[800px] bg-fuchsia-500/30 rounded-full blur-[150px] animate-pulse" style={{animationDelay:'1s'}} />
-        <div className="relative mx-auto max-w-7xl px-6"><div className="text-center max-w-5xl mx-auto space-y-12">
-          <div className="inline-flex items-center gap-3 rounded-full border-2 border-fuchsia-400/50 bg-fuchsia-500/20 px-7 py-3 shadow-lg backdrop-blur-sm"><span className="relative flex h-3 w-3"><span className="animate-ping absolute h-full w-full rounded-full bg-fuchsia-400 opacity-75"></span><span className="relative rounded-full h-3 w-3 bg-fuchsia-400"></span></span><span className="text-sm font-black uppercase tracking-widest text-fuchsia-300">Founding Tester Access</span></div>
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black leading-tight"><span className="text-white">Build Credit</span><br /><span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">The Smart Way</span></h1>
-          <p className="text-2xl md:text-3xl text-slate-300 leading-relaxed max-w-4xl mx-auto">See all <span className="font-bold text-cyan-400">three bureau scores</span> and get an AI-powered game plan—starting with a <span className="font-black bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent">FREE Snapshot</span>.</p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-            <a href={mfsnSnapshotUrl} target="_blank" rel="noreferrer" className="group inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-14 py-7 text-xl font-black text-black shadow-2xl hover:scale-105 transition-all">Start Free Snapshot<svg className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg></a>
-            <a href="#pricing" className="inline-flex items-center justify-center rounded-2xl border-2 border-slate-700 bg-slate-900/70 px-14 py-7 text-xl font-bold hover:border-cyan-500/60 hover:scale-105 transition-all">View Plans</a>
-          </div></div>
-          <div className="grid md:grid-cols-3 gap-8 mt-24 max-w-6xl mx-auto">
-            <div className="group rounded-3xl border-2 border-cyan-800/50 bg-gradient-to-br from-cyan-500/10 to-slate-900/90 p-10 hover:border-cyan-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:scale-105 transition-all duration-500"><h3 className="text-3xl font-black text-cyan-400 mb-3">Monitoring</h3><p className="text-slate-300 text-lg">Track all three bureaus</p></div>
-            <div className="group rounded-3xl border-2 border-purple-800/50 bg-gradient-to-br from-purple-500/10 to-slate-900/90 p-10 hover:border-purple-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] hover:scale-105 transition-all duration-500"><h3 className="text-3xl font-black text-purple-400 mb-3">Disputes</h3><p className="text-slate-300 text-lg">AI-generated letters</p></div>
-            <div className="group rounded-3xl border-2 border-fuchsia-800/50 bg-gradient-to-br from-fuchsia-500/10 to-slate-900/90 p-10 hover:border-fuchsia-500 hover:shadow-[0_0_40px_rgba(217,70,239,0.5)] hover:scale-105 transition-all duration-500"><h3 className="text-3xl font-black text-fuchsia-400 mb-3">Funding</h3><p className="text-slate-300 text-lg">Roadmap to approval</p></div>
-          </div></div>
+        <div className="absolute top-0 left-0 h-[700px] w-[700px] rounded-full bg-cyan-500/30 blur-[150px] animate-pulse" />
+        <div
+          className="absolute top-60 right-0 h-[800px] w-[800px] rounded-full bg-fuchsia-500/30 blur-[150px] animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div className="relative mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-5xl space-y-12 text-center">
+            <div className="inline-flex items-center gap-3 rounded-full border-2 border-fuchsia-400/50 bg-fuchsia-500/20 px-7 py-3 shadow-lg backdrop-blur-sm">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute h-full w-full animate-ping rounded-full bg-fuchsia-400 opacity-75" />
+                <span className="relative h-3 w-3 rounded-full bg-fuchsia-400" />
+              </span>
+              <span className="text-sm font-black uppercase tracking-widest text-fuchsia-300">
+                Founding Tester Access
+              </span>
+            </div>
+
+            <h1 className="text-6xl font-black leading-tight text-white md:text-7xl lg:text-8xl">
+              <span className="text-white">Build Credit</span>
+              <br />
+              <span className="bg-gradient-to-r from-cyan-400 to-teal-400 bg-clip-text text-transparent">
+                The Smart Way
+              </span>
+            </h1>
+
+            <p className="mx-auto max-w-4xl text-2xl leading-relaxed text-slate-300 md:text-3xl">
+              See all{" "}
+              <span className="font-bold text-cyan-400">three bureau scores</span>{" "}
+              and get an AI-powered game plan—starting with a{" "}
+              <span className="font-black bg-gradient-to-r from-cyan-400 to-cyan-300 bg-clip-text text-transparent">
+                FREE Snapshot
+              </span>
+              .
+            </p>
+
+            <div className="flex flex-col justify-center gap-6 pt-8 sm:flex-row">
+              <a
+                href={mfsnSnapshotUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-teal-500 px-14 py-7 text-xl font-black text-black shadow-2xl transition-all hover:scale-105"
+              >
+                Start Free Snapshot
+                <svg
+                  className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={3}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </a>
+              <a
+                href="#pricing"
+                className="inline-flex items-center justify-center rounded-2xl border-2 border-slate-700 bg-slate-900/70 px-14 py-7 text-xl font-bold transition-all hover:scale-105 hover:border-cyan-500/60"
+              >
+                View Plans
+              </a>
+            </div>
+          </div>
+
+          {/* Three pillars */}
+          <div className="mx-auto mt-24 grid max-w-6xl gap-8 md:grid-cols-3">
+            <div className="group rounded-3xl border-2 border-cyan-800/50 bg-gradient-to-br from-cyan-500/10 to-slate-900/90 p-10 transition-all duration-500 hover:scale-105 hover:border-cyan-500 hover:shadow-[0_0_40px_rgba(6,182,212,0.5)]">
+              <h3 className="mb-3 text-3xl font-black text-cyan-400">
+                Monitoring
+              </h3>
+              <p className="text-lg text-slate-300">Track all three bureaus</p>
+            </div>
+            <div className="group rounded-3xl border-2 border-purple-800/50 bg-gradient-to-br from-purple-500/10 to-slate-900/90 p-10 transition-all duration-500 hover:scale-105 hover:border-purple-500 hover:shadow-[0_0_40px_rgba(168,85,247,0.5)]">
+              <h3 className="mb-3 text-3xl font-black text-purple-400">
+                Disputes
+              </h3>
+              <p className="text-lg text-slate-300">AI-generated letters</p>
+            </div>
+            <div className="group rounded-3xl border-2 border-fuchsia-800/50 bg-gradient-to-br from-fuchsia-500/10 to-slate-900/90 p-10 transition-all duration-500 hover:scale-105 hover:border-fuchsia-500 hover:shadow-[0_0_40px_rgba(217,70,239,0.5)]">
+              <h3 className="mb-3 text-3xl font-black text-fuchsia-400">
+                Funding
+              </h3>
+              <p className="text-lg text-slate-300">Roadmap to approval</p>
+            </div>
+          </div>
+        </div>
       </section>
-      <section id="pricing" className="py-24 border-t border-slate-800"><div className="mx-auto max-w-7xl px-6"><div className="text-center mb-16"><h2 className="text-5xl font-black mb-4">Choose Your Plan</h2><p className="text-lg text-slate-300">MFSN required at <span className="text-cyan-400 font-bold">$29.95/mo</span></p></div><div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/30 shadow-xl"><table className="min-w-full text-sm"><thead className="bg-slate-900 border-b border-slate-800"><tr><th className="px-6 py-4 text-left font-bold">Plan</th><th className="px-6 py-4 text-left font-bold">MFSN</th><th className="px-6 py-4 text-left font-bold">3B</th><th className="px-6 py-4 text-left font-bold">Credit</th><th className="px-6 py-4 text-left font-bold">Total (Promo)</th><th className="px-6 py-4 text-left font-bold">Total (After)</th></tr></thead><tbody className="divide-y divide-slate-800"><tr className="hover:bg-slate-800/40 bg-gradient-to-r from-slate-900/30 to-transparent transition-all"><td className="px-6 py-5"><div className="font-bold">Basic</div><div className="text-xs text-slate-400">View only</div></td><td className="px-6 py-5">$29.95</td><td className="px-6 py-5">$0</td><td className="px-6 py-5">-</td><td className="px-6 py-5 font-black text-slate-300 text-lg">$29.95</td><td className="px-6 py-5 font-black text-lg">$29.95</td></tr><tr className="hover:bg-slate-800/50 bg-gradient-to-r from-slate-800/40 to-transparent transition-all"><td className="px-6 py-5"><div className="font-bold">Analyzer</div><div className="text-xs text-slate-400">$49 one-time</div></td><td className="px-6 py-5">$29.95</td><td className="px-6 py-5">$0</td><td className="px-6 py-5">-</td><td className="px-6 py-5 font-black text-slate-200 text-lg">$29.95 + $49</td><td className="px-6 py-5 font-black text-lg">$29.95</td></tr><tr className="hover:bg-cyan-900/20 bg-gradient-to-r from-cyan-900/10 to-transparent border-l-4 border-cyan-500 transition-all"><td className="px-6 py-5"><div className="font-bold text-cyan-400">Welcome</div><div className="text-xs text-slate-400">Disputes + tools</div></td><td className="px-6 py-5">$29.95</td><td className="px-6 py-5">$49.95</td><td className="px-6 py-5 text-cyan-400 font-bold">-$10/mo</td><td className="px-6 py-5 font-black text-cyan-400 text-lg">$69.90</td><td className="px-6 py-5 font-black text-lg">$79.90</td></tr><tr className="hover:bg-fuchsia-900/20 bg-gradient-to-r from-fuchsia-900/10 via-purple-900/10 to-transparent border-l-4 border-fuchsia-500 transition-all"><td className="px-6 py-5"><div className="font-bold text-fuchsia-400">Ultimate</div><div className="text-xs text-slate-400">Coaching + funding</div></td><td className="px-6 py-5">$29.95</td><td className="px-6 py-5">$69.95</td><td className="px-6 py-5 text-fuchsia-400 font-bold">-$15/mo</td><td className="px-6 py-5 font-black text-fuchsia-400 text-lg">$84.90</td><td className="px-6 py-5 font-black text-lg">$99.90</td></tr></tbody></table></div></div></section>
-      <section id="comparison" className="py-24 bg-slate-900/30"><div className="mx-auto max-w-5xl px-6"><h2 className="text-5xl font-black mb-12 text-center">Why 3B Beats Typical Credit Repair</h2><div className="grid md:grid-cols-2 gap-6"><div className="flex gap-4 p-8 rounded-2xl border border-slate-800 bg-slate-900/50 hover:border-cyan-500/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105 transition-all"><div className="text-cyan-400 text-3xl">✓</div><div><h3 className="font-bold text-lg mb-2">Lower Costs</h3><p className="text-sm text-slate-400">Most charge $79-$199/mo. 3B is $84.90/mo all-in.</p></div></div><div className="flex gap-4 p-8 rounded-2xl border border-slate-800 bg-slate-900/50 hover:border-cyan-500/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:scale-105 transition-all"><div className="text-cyan-400 text-3xl">✓</div><div><h3 className="font-bold text-lg mb-2">No Setup Fees</h3><p className="text-sm text-slate-400">No $99-$299 setup. Just $49 Analyzer.</p></div></div><div className="flex gap-4 p-8 rounded-2xl border border-slate-800 bg-slate-900/50 hover:border-fuchsia-500/60 hover:shadow-[0_0_25px_rgba(217,70,239,0.3)] hover:scale-105 transition-all"><div className="text-cyan-400 text-3xl">✓</div><div><h3 className="font-bold text-lg mb-2">Transparent</h3><p className="text-sm text-slate-400">MFSN shown separately.</p></div></div><div className="flex gap-4 p-8 rounded-2xl border border-slate-800 bg-slate-900/50 hover:border-fuchsia-500/60 hover:shadow-[0_0_25px_rgba(217,70,239,0.3)] hover:scale-105 transition-all"><div className="text-cyan-400 text-3xl">✓</div><div><h3 className="font-bold text-lg mb-2">Funding Focus</h3><p className="text-sm text-slate-400">Real funding roadmap.</p></div></div></div></div></section>
-      <footer className="border-t border-slate-800 py-8 bg-black"><div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400"><p>3B Credit Builder • Powered by MyFreeScoreNow • Monitoring • Disputes • Funding</p></div></footer>
+
+      {/* Pricing */}
+      <section id="pricing" className="border-t border-slate-800 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-16 text-center">
+            <h2 className="mb-4 text-5xl font-black">Choose Your Plan</h2>
+            <p className="text-lg text-slate-300">
+              MFSN required at{" "}
+              <span className="font-bold text-cyan-400">$29.95/mo</span>
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/30 shadow-xl">
+            <table className="min-w-full text-sm">
+              <thead className="border-b border-slate-800 bg-slate-900">
+                <tr>
+                  <th className="px-6 py-4 text-left font-bold">Plan</th>
+                  <th className="px-6 py-4 text-left font-bold">MFSN</th>
+                  <th className="px-6 py-4 text-left font-bold">3B</th>
+                  <th className="px-6 py-4 text-left font-bold">Credit</th>
+                  <th className="px-6 py-4 text-left font-bold">
+                    Total (Promo)
+                  </th>
+                  <th className="px-6 py-4 text-left font-bold">
+                    Total (After)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800">
+                <tr className="bg-gradient-to-r from-slate-900/30 to-transparent transition-all hover:bg-slate-800/40">
+                  <td className="px-6 py-5">
+                    <div className="font-bold">Basic</div>
+                    <div className="text-xs text-slate-400">View only</div>
+                  </td>
+                  <td className="px-6 py-5">$29.95</td>
+                  <td className="px-6 py-5">$0</td>
+                  <td className="px-6 py-5">-</td>
+                  <td className="px-6 py-5 text-lg font-black text-slate-300">
+                    $29.95
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black">$29.95</td>
+                </tr>
+
+                <tr className="bg-gradient-to-r from-slate-800/40 to-transparent transition-all hover:bg-slate-800/50">
+                  <td className="px-6 py-5">
+                    <div className="font-bold">Analyzer</div>
+                    <div className="text-xs text-slate-400">$49 one-time</div>
+                  </td>
+                  <td className="px-6 py-5">$29.95</td>
+                  <td className="px-6 py-5">$0</td>
+                  <td className="px-6 py-5">-</td>
+                  <td className="px-6 py-5 text-lg font-black text-slate-200">
+                    $29.95 + $49
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black">$29.95</td>
+                </tr>
+
+                <tr className="border-l-4 border-cyan-500 bg-gradient-to-r from-cyan-900/10 to-transparent transition-all hover:bg-cyan-900/20">
+                  <td className="px-6 py-5">
+                    <div className="font-bold text-cyan-400">Welcome</div>
+                    <div className="text-xs text-slate-400">Disputes + tools</div>
+                  </td>
+                  <td className="px-6 py-5">$29.95</td>
+                  <td className="px-6 py-5">$49.95</td>
+                  <td className="px-6 py-5 font-bold text-cyan-400">
+                    -$10/mo
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black text-cyan-400">
+                    $69.90
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black">$79.90</td>
+                </tr>
+
+                <tr className="border-l-4 border-fuchsia-500 bg-gradient-to-r from-fuchsia-900/10 via-purple-900/10 to-transparent transition-all hover:bg-fuchsia-900/20">
+                  <td className="px-6 py-5">
+                    <div className="font-bold text-fuchsia-400">Ultimate</div>
+                    <div className="text-xs text-slate-400">
+                      Coaching + funding
+                    </div>
+                  </td>
+                  <td className="px-6 py-5">$29.95</td>
+                  <td className="px-6 py-5">$69.95</td>
+                  <td className="px-6 py-5 font-bold text-fuchsia-400">
+                    -$15/mo
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black text-fuchsia-400">
+                    $84.90
+                  </td>
+                  <td className="px-6 py-5 text-lg font-black">$99.90</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* Why 3B */}
+      <section id="comparison" className="bg-slate-900/30 py-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <h2 className="mb-12 text-center text-5xl font-black">
+            Why 3B Beats Typical Credit Repair
+          </h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="flex gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-8 transition-all hover:scale-105 hover:border-cyan-500/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+              <div className="text-3xl text-cyan-400">✓</div>
+              <div>
+                <h3 className="mb-2 text-lg font-bold">Lower Costs</h3>
+                <p className="text-sm text-slate-400">
+                  Most charge $79–$199/mo. 3B is $84.90/mo all‑in.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-8 transition-all hover:scale-105 hover:border-cyan-500/60 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+              <div className="text-3xl text-cyan-400">✓</div>
+              <div>
+                <h3 className="mb-2 text-lg font-bold">No Setup Fees</h3>
+                <p className="text-sm text-slate-400">
+                  No $99–$299 setup. Just $49 Analyzer.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-8 transition-all hover:scale-105 hover:border-fuchsia-500/60 hover:shadow-[0_0_25px_rgba(217,70,239,0.3)]">
+              <div className="text-3xl text-cyan-400">✓</div>
+              <div>
+                <h3 className="mb-2 text-lg font-bold">Transparent</h3>
+                <p className="text-sm text-slate-400">
+                  MFSN shown separately.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 rounded-2xl border border-slate-800 bg-slate-900/50 p-8 transition-all hover:scale-105 hover:border-fuchsia-500/60 hover:shadow-[0_0_25px_rgba(217,70,239,0.3)]">
+              <div className="text-3xl text-cyan-400">✓</div>
+              <div>
+                <h3 className="mb-2 text-lg font-bold">Funding Focus</h3>
+                <p className="text-sm text-slate-400">Real funding roadmap.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-800 bg-black py-8">
+        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400">
+          <p>
+            3B Credit Builder • Powered by MyFreeScoreNow • Monitoring •
+            Disputes • Funding
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
