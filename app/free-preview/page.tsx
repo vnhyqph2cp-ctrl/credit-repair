@@ -16,5 +16,5 @@ export default function FreePreview() {
         </a>
       </div>
     </main>
-  )
+  );
 }

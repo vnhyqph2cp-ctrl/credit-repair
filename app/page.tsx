@@ -18,8 +18,7 @@ export default function Home() {
           {/* PRIMARY CTA */}
           <a
             href="/start-analysis"
-            className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 
-                       text-white font-semibold rounded-lg text-lg text-center"
+            className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg text-lg text-center"
           >
             Start Full Credit Analysis
           </a>
@@ -71,5 +70,5 @@ export default function Home() {
         Secure • You stay in control • No pressure
       </footer>
     </main>
-  )
+  );
 }
