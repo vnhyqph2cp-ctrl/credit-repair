@@ -1,22 +1,13 @@
-// app/layout.tsx
-import type { Metadata } from "next";
-import "./globals.css";
+import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "3B Credit Builder",
-  description: "Build credit the smart way with AI-powered monitoring, disputes, and funding roadmap",
-};
-
-export default function RootLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="bg-black antialiased">
-        {children}
-      </body>
-    </html>
+    <div className="min-h-screen bg-black text-white">
+      {children}
+    </div>
   );
 }
