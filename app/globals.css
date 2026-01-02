@@ -1,40 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --color-background: #020617;
-  --color-primary: #06b6d4;
-  --color-secondary: #14b8a6;
-  --color-highlight: #84cc16;
-  --color-accent: #d946ef;
-  --color-text-main: #E5E7EB;
-  --color-text-muted: #9CA3AF;
-  --color-border: #1F2933;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  font-size: 16px;
-}
-
+﻿/* Visible test rule to confirm globals.css is loading */
 body {
-  background-color: var(--color-background);
-  color: var(--color-text-main);
-  font-family: system-ui, -apple-system, sans-serif;
-  overflow-x: hidden;
+  outline: 5px solid lime;
 }
 
-/* Only reduce font size on small mobile */
-@media (max-width: 480px) {
-  html { font-size: 15px; }
+/* Keep your other global styles below */
+:root {
+  --bg: #000;
+  --fg: #fff;
 }
 
-/* Mobile touch targets */
-@media (max-width: 640px) {
-  button, a { min-height: 44px; }
+html, body, #__next, #root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-
-/* Remove tap highlight */
-* { -webkit-tap-highlight-color: transparent; }
