@@ -1,0 +1,42 @@
+[Your Name]
+[Your Address]
+[City, State ZIP]
+[Date]
+
+[Credit Bureau Name]
+[Credit Bureau Address]
+
+Re: Dispute of Inaccurate Credit Reporting
+
+To Whom It May Concern,
+
+I am writing to formally dispute the accuracy of the following item(s) on my credit report. After reviewing my report, I believe the information listed below may be inaccurate or incomplete.
+
+Account Name: [Creditor Name]
+Account Number: [Partial or Last 4 Digits]
+Reason for Dispute: [Brief factual reason]
+
+Under the Fair Credit Reporting Act (15 U.S.C. §1681), I am requesting that you investigate this matter and verify the accuracy of the information being reported. If the information cannot be verified, please remove or correct it accordingly.
+
+Please provide me with the results of your investigation once it is complete.
+
+Thank you for your time and attention.
+
+Sincerely,
+[Your Name]
+
+
+---
+BUREAU ADDRESSES (for reference):
+
+Equifax
+P.O. Box 740256
+Atlanta, GA 30374
+
+Experian
+P.O. Box 4500
+Allen, TX 75013
+
+TransUnion
+P.O. Box 2000
+Chester, PA 19016

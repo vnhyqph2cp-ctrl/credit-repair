@@ -1,67 +1,88 @@
-// app/page.tsx
-import React from "react";
+import Link from "next/link";
+import { CreditGauge } from "@/components/ui/CreditGauge";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <div className="mx-auto max-w-5xl px-4 py-16">
-        {/* Hero section */}
-        <section className="grid gap-12 md:grid-cols-2 items-center">
-          <div className="space-y-6">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-              3B Credit Builder
-            </h1>
-            <p className="text-base sm:text-lg text-white/80">
-              Launch clients into a structured, automated credit‑building
-              program connected to your 3B ecosystem, payments, and fleet of
-              financial tools.
-            </p>
+    <main className="relative overflow-hidden">
 
-            <div className="space-y-4 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
-              <h2 className="text-lg font-semibold text-white">
-                What you get today
-              </h2>
-              <ul className="space-y-3 text-sm sm:text-base">
-                <li className="flex items-start gap-3 text-white/90">
-                  <span className="text-[#00D9FF] text-xl">✓</span>
-                  <span>Interactive dashboard with progress tracking</span>
-                </li>
-                <li className="flex items-start gap-3 text-white/90">
-                  <span className="text-[#00D9FF] text-xl">✓</span>
-                  <span>Automated rounds, plans, and letter workflows</span>
-                </li>
-                <li className="flex items-start gap-3 text-white/90">
-                  <span className="text-[#00D9FF] text-xl">✓</span>
-                  <span>Dashboard tools unlocked</span>
-                </li>
-                <li className="flex items-start gap-3 text-white/90">
-                  <span className="text-[#00D9FF] text-xl">✓</span>
-                  <span>Cancel anytime before trial ends</span>
-                </li>
-              </ul>
-            </div>
+      {/* Floating Orbs */}
+      <div className="gradient-orb orb-1 delay-1" />
+      <div className="gradient-orb orb-2 delay-2" />
+      <div className="gradient-orb orb-3 delay-3" />
 
-            <div className="space-y-3">
-              <a
-                href="https://myfreescorenow.com/en/creditsnapshot/user/register/6153?source=default"
-                className="block w-full py-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-center text-white font-semibold"
-              >
-                Start Your Free Credit Snapshot
-              </a>
-              <p className="text-xs text-white/60 text-center">
-                Takes less than 2 minutes. No impact to credit scores.
-              </p>
-            </div>
-          </div>
+      {/* HERO */}
+      <section className="landing-center py-32 relative z-10">
+        <header className="landing-header">
+          <h1 className="landing-headline">
+            Build Real Credit — Backed by Systems, Not Guesswork
+          </h1>
+          <p className="landing-subhead">
+            3B Credit Builder enforces accurate reporting using automation,
+            timelines, and compliance — not generic disputes.
+          </p>
+        </header>
 
-          {/* Right side placeholder / illustration */}
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-            <div className="h-64 w-full rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-black flex items-center justify-center text-white/60 text-sm">
-              Dashboard preview coming soon
-            </div>
-          </div>
-        </section>
-      </div>
+        {/* CTAs */}
+        <div className="landing-cta-row flex">
+          <Link href="/snapshot" className="btn btn-large glow-neon btn-3d">
+            Start Free Snapshot
+          </Link>
+          <Link href="/login" className="btn btn-large glow-soft btn-3d">
+            Returning Member Login
+          </Link>
+        </div>
+      </section>
+
+      {/* VISUAL PROOF */}
+      <section className="flex justify-center py-24 relative z-10">
+        <CreditGauge value={742} label="System Credit Score" />
+      </section>
+
+      {/* PATH SELECTION */}
+      <section className="landing-features flex py-24 relative z-10">
+        <Link href="/snapshot" className="feature-card tile-3d surface-teal p-6 rounded-xl">
+          <div className="feature-icon">📊</div>
+          <strong>Free Snapshot</strong>
+          <span className="opacity-80 text-sm">
+            See what the system sees
+          </span>
+        </Link>
+
+        <Link href="/signup" className="feature-card tile-3d p-6 rounded-xl">
+          <div className="feature-icon">🚀</div>
+          <strong>Join 3B Credit Builder</strong>
+          <span className="opacity-80 text-sm">
+            Full automation + enforcement
+          </span>
+        </Link>
+
+        <Link href="/pricing" className="feature-card tile-3d p-6 rounded-xl">
+          <div className="feature-icon">💳</div>
+          <strong>Pricing</strong>
+          <span className="opacity-80 text-sm">
+            Simple. Transparent.
+          </span>
+        </Link>
+
+        <Link href="/about" className="feature-card tile-3d p-6 rounded-xl">
+          <div className="feature-icon">🧠</div>
+          <strong>About 3B</strong>
+          <span className="opacity-80 text-sm">
+            Why this system exists
+          </span>
+        </Link>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="text-center py-32 relative z-10">
+        <h2 className="text-3xl font-bold mb-4">
+          Start with the Snapshot. Let the system do the work.
+        </h2>
+        <Link href="/snapshot" className="btn btn-large glow-neon btn-3d">
+          Get Started Free
+        </Link>
+      </section>
+
     </main>
   );
 }

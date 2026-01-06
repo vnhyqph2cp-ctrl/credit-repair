@@ -14,7 +14,8 @@ export type DashboardState = {
 };
 
 export async function getDashboardState(customerId: string): Promise<DashboardState> {
-  const supabase = createServerSupabaseClient();
+const supabase = await createServerSupabaseClient();
+
 
   // Example: adjust table/column names to your DB
   const { data: report, error } = await supabase

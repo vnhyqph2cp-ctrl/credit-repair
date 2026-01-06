@@ -23,7 +23,7 @@ export type FundingReadinessResult = {
 export async function calculateFundingReadiness(
   userId: string
 ): Promise<FundingReadinessResult> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // -----------------------------
   // 1. Load latest Snapshot

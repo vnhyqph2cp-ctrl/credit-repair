@@ -8,7 +8,7 @@ export async function logBandChange(
   toBand: Band,
   frs: number
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("funding_band_events").insert({
     user_id: userId,
@@ -25,7 +25,7 @@ export async function logOfferImpression(
   band: Band,
   frs: number
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("funding_offer_events").insert({
     user_id: userId,
@@ -44,7 +44,7 @@ export async function logOfferClick(
   band: Band,
   frs: number
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("funding_offer_events").insert({
     user_id: userId,

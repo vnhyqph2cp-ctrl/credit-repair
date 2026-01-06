@@ -26,15 +26,30 @@ export async function POST(req: Request) {
   const score_ex = extracted?.scores?.EXP ?? null;
   const disputable_item_count = Array.isArray(extracted?.disputable_items) ? extracted.disputable_items.length : 0;
 
-  await prisma.creditReport.create({
+  // Create snapshot instead of creditReport
+  await prisma.snapshot.create({
     data: {
-      customer_id,
-      raw_mfsn_json: raw,
-      extracted_json: extracted,
-      score_tu,
-      score_eq,
-      score_ex,
-      disputable_item_count,
+      customerId: customer_id,
+      rawData: raw,
+      extractedJson: extracted,
+      scoreTu: score_tu,
+      scoreEq: score_eq,
+      scoreEx: score_ex,
+      status: 'ready',
+    },
+  });
+
+  // Update customer scores
+  await prisma.customer.update({
+    where: { id: customer_id },
+    data: {
+      scoreTu: score_tu,
+      scoreEq: score_eq,
+      scoreEx: score_ex,
+      scoreAvg: score_tu && score_eq && score_ex 
+        ? Math.round((score_tu + score_eq + score_ex) / 3) 
+        : null,
+      disputableCount: disputable_item_count,
     },
   });
 

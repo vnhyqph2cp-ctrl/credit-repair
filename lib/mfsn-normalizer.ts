@@ -384,7 +384,7 @@ function buildNegativeItems(accounts: Extracted3BStandard["accounts"], publicRec
     const cond = (a.account_condition ?? "").toLowerCase();
 
     const isCollection = a.account_type.toLowerCase().includes("collection") || pay.includes("collection");
-    const isChargeoff = pay.includes("chargeoff") || a.remarks.some((r) => r.toLowerCase().includes("charged off"));
+    const isChargeoff = pay.includes("chargeoff") || a.remarks?.some((r) => r.toLowerCase().includes("charged off"));
     const isDerog = cond.includes("derog");
 
     if (isCollection || isChargeoff || isDerog) {
@@ -444,7 +444,7 @@ function buildDisputableItems(
     const pay = (a.pay_status ?? "").toLowerCase();
     const cond = (a.account_condition ?? "").toLowerCase();
 
-    const hasDisputeRemark = a.remarks.some((r) => r.toLowerCase().includes("disputed"));
+    const hasDisputeRemark = a.remarks?.some((r) => r.toLowerCase().includes("disputed"));
     const isDerog = cond.includes("derog");
     const isBadPay = pay.includes("collection") || pay.includes("chargeoff") || pay.includes("coll/chargeoff");
 

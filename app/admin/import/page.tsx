@@ -7,7 +7,8 @@ export default function AdminImportPage() {
         Beta-safe: paste JSON, normalize into 3B Standard, save to credit_reports.
       </p>
 
-      <form action="/api/admin/import" method="post" className="mt-6 space-y-4">
+<form action="/api/import" method="post" className="mt-6 space-y-4">
+
         <input
           name="customer_id"
           placeholder="customer_id (UUID)"

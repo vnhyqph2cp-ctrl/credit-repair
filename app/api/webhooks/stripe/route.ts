@@ -2,10 +2,15 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
+import { mapPriceIdToTier } from "@/lib/stripe/pricing";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-06-20" });
+// Make this route dynamic to avoid build-time errors
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  // Initialize Stripe inside the function to avoid build-time env var issues
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2025-12-15.clover" });
+
   const sig = req.headers.get("stripe-signature");
   const body = await req.text();
 
@@ -22,14 +27,28 @@ export async function POST(req: Request) {
     const stripeCustomerId = String(sub.customer);
     const subId = sub.id;
 
-    // Map your pricing/product to tiers here:
+    // Map price ID to tier
     const tier = mapStripeSubscriptionToTier(sub);
 
     await prisma.customer.updateMany({
-      where: { stripe_customer_id: stripeCustomerId },
+      where: { stripeCustomerId: stripeCustomerId },
       data: {
-        stripe_subscription_id: subId,
-        current_plan_tier: tier,
+        currentPlanTier: tier,
+        updatedAt: new Date(),
+      },
+    });
+  }
+
+  // Handle subscription deletions
+  if (event.type === "customer.subscription.deleted") {
+    const sub = event.data.object as Stripe.Subscription;
+    const stripeCustomerId = String(sub.customer);
+
+    await prisma.customer.updateMany({
+      where: { stripeCustomerId: stripeCustomerId },
+      data: {
+        currentPlanTier: "basic",
+        updatedAt: new Date(),
       },
     });
   }
@@ -37,9 +56,14 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true });
 }
 
-function mapStripeSubscriptionToTier(sub: Stripe.Subscription): any {
-  // TODO: map by price IDs
-  // Example:
-  // if (sub.items.data.some(i => i.price.id === process.env.STRIPE_PRICE_ULTIMATE)) return "ultimate";
-  return "basic";
+function mapStripeSubscriptionToTier(sub: Stripe.Subscription): string {
+  // Get the first price ID from subscription items
+  const priceId = sub.items.data[0]?.price?.id;
+  
+  if (!priceId) {
+    console.warn("No price ID found in subscription");
+    return "basic";
+  }
+
+  return mapPriceIdToTier(priceId);
 }

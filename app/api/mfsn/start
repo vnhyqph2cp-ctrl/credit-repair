@@ -1,0 +1,18 @@
+// app/api/mfsn/start/route.ts
+import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabase/server";
+
+export async function GET() {
+  const supabase = await supabaseServer();
+  const { data } = await supabase.auth.getUser();
+
+  if (!data.user) {
+    return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_SITE_URL));
+  }
+
+  const mfsn = new URL("https://your-mfsn-provider.com/start");
+  mfsn.searchParams.set("return_url", `${process.env.NEXT_PUBLIC_SITE_URL}/api/mfsn/callback`);
+  mfsn.searchParams.set("state", data.user.id);
+
+  return NextResponse.redirect(mfsn);
+}

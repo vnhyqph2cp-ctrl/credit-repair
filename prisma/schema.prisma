@@ -4,10 +4,11 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+
+
 generator client {
   provider = "prisma-client-js"
 }
-
 
 model Customer {
   id               String   @id @default(uuid())
@@ -22,6 +23,13 @@ model Customer {
   currentPlanTier  String?  @default("basic") // basic, analyzer, welcome, ultimate
   stripeCustomerId String?  @unique
 
+  // Reseller system
+  role             String?  @default("user") // user, reseller, admin
+  referralCode     String?  @unique @map("referral_code")
+  resellerId       String?  @map("reseller_id")
+  reseller         Customer? @relation("ResellerClients", fields: [resellerId], references: [id], onDelete: SetNull)
+  clients          Customer[] @relation("ResellerClients")
+
   // Credit scores
   scoreTu          Int?
   scoreEq          Int?
@@ -35,9 +43,17 @@ model Customer {
   disputableCount  Int?     @default(0)
   lastAction       String?
 
-  snapshots        Snapshot[]
-  disputePlans     DisputePlan[]
-  letters          Letter[]
+  snapshots           Snapshot[]
+  disputePlans        DisputePlan[]
+  letters             Letter[]
+  unclaimedProperties UnclaimedProperty[]
+  unclaimedAgreements UnclaimedAgreement[]
+  disputeSuggestions  DisputeSuggestion[]
+  commissionsEarned   ResellerCommission[] @relation("ResellerCommissions")
+  commissionsGenerated ResellerCommission[] @relation("UserCommissions")
+
+  @@index([resellerId])
+  @@index([role])
 }
 
 model Snapshot {
@@ -99,4 +115,345 @@ model Letter {
   updatedAt  DateTime @updatedAt
 
   @@index([customerId, round])
+}
+
+enum UnclaimedStatus {
+  PENDING
+  CLAIMED
+  REJECTED
+  FUNDED
+}
+
+enum UnclaimedAgreementType {
+  FINDER_FEE
+  POWER_OF_ATTORNEY
+}
+
+model UnclaimedProperty {
+  id              String          @id @default(uuid()) @map("unclaimedPropertyId")
+  customerId      String
+  state           String          // e.g. "NV"
+  holder          String
+  amountCents     Int
+  assetType       String          // "Bank", "Insurance", "Wages"
+  referenceNumber String?
+  status          UnclaimedStatus @default(PENDING)
+  claimUrl        String?
+  metadata        Json?           // includes dateDeliveredToState
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  customer   Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  agreements UnclaimedAgreement[]
+
+  @@index([customerId])
+  @@index([status, state])
+  @@map("unclaimedProperties")
+}
+
+model UnclaimedAgreement {
+  id                  String                 @id @default(uuid()) @map("unclaimedAgreementId")
+  customerId          String
+  unclaimedPropertyId String                @map("unclaimedPropertyId")
+  agreementType       UnclaimedAgreementType
+  termsAccepted       Boolean               @default(false)
+  signedAt            DateTime?
+  feePercentage       Float?                // NV caps enforced in code
+  metadata            Json?
+  createdAt           DateTime              @default(now())
+
+  customer Customer          @relation(fields: [customerId], references: [id])
+  property UnclaimedProperty @relation(fields: [unclaimedPropertyId], references: [id])
+
+  @@unique([customerId, unclaimedPropertyId, agreementType])
+  @@map("unclaimedAgreements")
+}
+
+model DisputeSuggestion {
+  id              String   @id @default(uuid())
+  customerId      String
+  bureau          String
+  creditor        String
+  reason          String
+  analyzerSection String   // 'A' | 'B' | 'C'
+  dismissed       Boolean  @default(false)
+  roundNumber     Int?     // Link to specific round (1, 2, or 3)
+  createdAt       DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("disputeSuggestions")
+}
+
+model AnalyzerRun {
+  id              String   @id @default(uuid())
+  memberId        String
+  runNumber       Int
+  scoreAvg        Int?
+  scoreEq         Int?
+  scoreEx         Int?
+  scoreTu         Int?
+  negativesCount  Int?
+  utilizationPct  Float?
+  inquiriesCount  Int?
+  createdAt       DateTime @default(now())
+
+  @@index([memberId, createdAt(sort: Desc)])
+  @@map("analyzerRuns")
+}
+
+model DisputeRound {
+  id           String    @id @default(uuid())
+  memberId     String
+  roundNumber  Int       // 1, 2, or 3
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([memberId, roundNumber])
+  @@map("disputeRounds")
+}
+model ResellerCommission {
+  id          String    @id @default(uuid())
+  resellerId  String    @map("reseller_id")
+  userId      String    @map("user_id")
+  amount      Decimal   @db.Decimal(10, 2)
+  reason      String
+  metadata    Json?     @default("{}")
+  status      String    @default("pending") // pending, approved, paid, cancelled
+  createdAt   DateTime  @default(now()) @map("created_at")
+  paidAt      DateTime? @map("paid_at")
+
+  reseller Customer @relation("ResellerCommissions", fields: [resellerId], references: [id], onDelete: Cascade)
+  user     Customer @relation("UserCommissions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([resellerId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("reseller_commissions")
+}
+model AnalyzerRule {
+  id              String   @id @default(uuid())
+  ruleKey         String   @unique
+  description     String
+  analyzerSection String   // 'A' | 'B' | 'C'
+  defaultRound    Int      // 1, 2, or 3
+  enabled         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([analyzerSection])
+  @@map("analyzerRules")
+}
+
+model DisputeOutcome {
+  id                    String   @id @default(uuid())
+  memberId              String
+  suggestionId          String?  // Link to DisputeSuggestion if applicable
+  ruleKey               String?  // Which rule triggered this dispute
+  bureau                String   // EQ, EX, TU
+  creditor              String
+  disputeReason         String
+  roundNumber           Int
+  outcome               String   // 'removed' | 'verified' | 'updated' | 'pending' | 'no_response'
+  disputedAt            DateTime
+  resolvedAt            DateTime?
+  notes                 String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([memberId, outcome])
+  @@index([ruleKey, outcome])
+  @@map("disputeOutcomes")
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 3B ANALYZER + MAIL ENFORCEMENT DOCTRINE
+// Day-1 Production Standard — Evidence-Driven Compliance System
+// ═══════════════════════════════════════════════════════════════════
+
+enum MailClassification {
+  VERIFICATION_REQUEST       // Bureau asking for ID verification
+  STALL_LETTER              // "We need more time" / "insufficient ID" after verification
+  GENERIC_RESPONSE          // Boilerplate acknowledgment with no investigation results
+  PARTIAL_UPDATE            // Some items addressed, others ignored
+  NO_RESPONSE               // 30+ days, nothing received
+  DELETION_CONFIRMATION     // Item removed from report
+  REINSERTION_NOTICE        // Previously deleted item re-added
+  VERIFICATION_ACCEPTED     // Identity verified, proceed with investigation
+  PROCEDURAL_FAILURE        // Address cycling, clock manipulation, other violations
+  FURNISHER_RESPONSE        // Direct response from data furnisher
+}
+
+enum RoundStatus {
+  IDENTITY_VERIFICATION     // Round 1 mandatory - establishing identity
+  INVESTIGATION_PENDING     // Dispute filed, waiting for response
+  RESPONSE_RECEIVED         // Mail received, under classification
+  STALLED                   // Procedural stall detected
+  VIOLATION_DETECTED        // 30+ day violation or procedural failure
+  RESOLVED_DELETED          // Item deleted from report
+  RESOLVED_VERIFIED         // Bureau verified item as accurate
+  RESOLVED_UPDATED          // Item information corrected
+  ESCALATION_REQUIRED       // Ready for legal/regulatory action
+}
+
+enum ViolationType {
+  DAY_31_TIMEOUT            // No response within 30 days (+1 grace)
+  IDENTITY_STALL            // ID requested after Round 1 verification
+  ADDRESS_CYCLING           // Bureau cycling through multiple addresses
+  GENERIC_STALL             // Non-responsive acknowledgment letter
+  CLOCK_MANIPULATION        // Bureau attempting to reset statutory timeline
+  INCOMPLETE_INVESTIGATION  // Partial response without addressing all items
+  REINSERTION_NO_NOTICE     // Item re-added without proper notification
+}
+
+model AnalyzerItem {
+  id                   String    @id @default(uuid())
+  memberId             String
+  suggestionId         String?   // Link to DisputeSuggestion
+
+  // Item identification
+  bureau               String    // EQ, EX, TU
+  creditor             String
+  accountNumber        String?
+  itemType             String    // tradeline, inquiry, public_record, etc.
+  disputeReason        String
+
+  // Round tracking
+  roundNumber          Int       @default(1)
+  roundStatus          RoundStatus @default(IDENTITY_VERIFICATION)
+
+  // Enforcement tracking
+  proceduralViolation  Boolean   @default(false)
+  violationType        ViolationType?
+  violationDetails     String?   @db.Text
+
+  // Timing (statutory enforcement)
+  disputeFiledAt       DateTime
+  responseDeadline     DateTime  // disputeFiledAt + 31 days
+  lastResponseAt       DateTime?
+  resolvedAt           DateTime?
+
+  // Outcome
+  outcome              String?   // removed, verified, updated, violation
+  nextAction           String?   @db.Text // Auto-generated next step
+
+  // Metadata
+  analyzerSection      String?   // A, B, C
+  ruleKey              String?
+  metadata             Json?
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  mailEvidence         MailEvidence[]
+
+  @@index([memberId, roundStatus])
+  @@index([bureau, roundNumber])
+  @@index([proceduralViolation])
+  @@index([responseDeadline])
+  @@map("analyzerItems")
+}
+
+model MailEvidence {
+  id                   String              @id @default(uuid())
+  memberId             String
+  analyzerItemId       String?
+  analyzerItem         AnalyzerItem?       @relation(fields: [analyzerItemId], references: [id], onDelete: Cascade)
+
+  // Evidence chain of custody
+  receivedAt           DateTime
+  classification       MailClassification
+  bureau               String              // EQ, EX, TU, or furnisher name
+  roundNumber          Int
+
+  // Document storage
+  envelopeImageUrl     String?             // Photo of envelope (postmark proof)
+  documentImageUrls    Json?               // Array of document page URLs
+  rawText              String?             @db.Text // OCR or manual entry
+
+  // Timing enforcement
+  postmarkDate         DateTime?           // From envelope
+  daysFromDispute      Int?                // Auto-calculated
+
+  // Violation detection
+  triggersViolation    Boolean             @default(false)
+  violationType        ViolationType?
+  violationNotes       String?             @db.Text
+
+  // Manual overrides (audit trail)
+  manualClassification Boolean             @default(false)
+  classifiedBy         String?             // User/admin who classified
+  classificationNotes  String?             @db.Text
+
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  @@index([memberId, roundNumber])
+  @@index([analyzerItemId])
+  @@index([classification])
+  @@index([receivedAt])
+  @@map("mailEvidence")
+}
+
+model IdentityVerification {
+  id                   String    @id @default(uuid())
+  memberId             String
+  bureau               String    // EQ, EX, TU
+
+  // Round 1 mandatory verification
+  verificationSentAt   DateTime
+  verificationMethod   String    // certified_mail, online_portal, etc.
+  trackingNumber       String?
+
+  // Response
+  verifiedAt           DateTime?
+  verificationStatus   String    @default("pending") // pending, verified, rejected
+  rejectionReason      String?
+
+  // Evidence
+  evidenceUrl          String?   // Uploaded ID documents
+  confirmationUrl      String?   // Bureau confirmation
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([memberId, bureau])
+  @@index([verificationStatus])
+  @@map("identityVerifications")
+}
+
+model EnforcementAction {
+  id                   String    @id @default(uuid())
+  memberId             String
+  analyzerItemId       String?
+  mailEvidenceId       String?
+
+  // Action details
+  actionType           String    // cfpb_complaint, lawsuit, state_ag, regulatory_escalation
+  violationType        ViolationType
+  targetEntity         String    // Bureau or furnisher name
+  
+  // Filing information
+  filedAt              DateTime?
+  filingReference      String?   // Case number, complaint ID
+  status               String    @default("prepared") // prepared, filed, pending, resolved
+
+  // Evidence package
+  evidencePackageUrl   String?   // Compiled documentation
+  timeline             Json?     // Chronological evidence chain
+
+  // Resolution
+  resolvedAt           DateTime?
+  resolution           String?   @db.Text
+  damages              Decimal?  @db.Decimal(10, 2)
+
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([memberId, status])
+  @@index([violationType])
+  @@map("enforcementActions")
 }
