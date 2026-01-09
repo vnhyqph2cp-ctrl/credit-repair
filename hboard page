@@ -1,0 +1,148 @@
+[1mdiff --git a/app/dashboard/page.tsx b/app/dashboard/page.tsx[m
+[1mindex 19a1afb..64bd52a 100644[m
+[1m--- a/app/dashboard/page.tsx[m
+[1m+++ b/app/dashboard/page.tsx[m
+[36m@@ -1,10 +1,9 @@[m
+[31m-import { BADGES } from "./components/badges";[m
+[31m-import { BadgePicker } from "./components/BadgePicker";[m
+[31m-import NeonGauge from "./components/NeonGauge";[m
+[32m+[m[32m// app/dashboard/page.tsx[m
+ [m
+[31m-// ...[m
+[31m-<NeonGauge value={avg} label="3B Average Score" sublabel="TransUnion • Equifax • Experian" />[m
+[32m+[m[32mimport NeonGauge from "./components/NeonGauge";[m
+ [m
+[32m+[m[32mtype Score = { bureau: "TU" | "EQF" | "EXP"; score: number; pulledAt: string };[m
+[32m+[m[32mtype Health = { customerId: string; overallScore: number };[m
+ [m
+ async function get3BReport(customerId: string): Promise<Score[] | null> {[m
+   try {[m
+[36m@@ -35,7 +34,7 @@[m [mfunction clamp(n: number, min: number, max: number) {[m
+ }[m
+ [m
+ function scoreToPct(score: number) {[m
+[31m-  // Credit range baseline 300-850[m
+[32m+[m[32m  // Credit baseline 300–850[m
+   return clamp(((score - 300) / (850 - 300)) * 100, 0, 100);[m
+ }[m
+ [m
+[36m@@ -69,7 +68,7 @@[m [mfunction toneClasses(tone: "slate" | "lime" | "cyan" | "purple" | "fuchsia") {[m
+ }[m
+ [m
+ export default async function DashboardPage() {[m
+[31m-  // Beta placeholder — later this comes from Supabase Auth customer record[m
+[32m+[m[32m  // TODO: replace with Supabase/Auth customer record later[m
+   const customerId = "cust_test_123";[m
+ [m
+   const [scores, health] = await Promise.all([get3BReport(customerId), get3BHealth(customerId)]);[m
+[36m@@ -78,17 +77,13 @@[m [mexport default async function DashboardPage() {[m
+     scores && scores.length ? Math.round(scores.reduce((sum, s) => sum + s.score, 0) / scores.length) : 0;[m
+ [m
+   const pct = avg ? scoreToPct(avg) : 0;[m
+[31m-[m
+[31m-  // If you have a real delta somewhere later, plug it here.[m
+[31m-  // For now we show "Latest Snapshot" instead of fake numbers.[m
+   const status = statusFromScore(avg);[m
+[31m-[m
+[31m-  const gradId = `bbGradient-${customerId}`;[m
+[31m-  const glowId = `bbGlow-${customerId}`;[m
+[31m-[m
+   const hasSnapshot = !!(scores && scores.length);[m
+ [m
+[31m-  const nextAction = hasSnapshot ? "Review disputable items and start Round 1." : "Connect MyFreeScoreNow to pull your Snapshot.";[m
+[32m+[m[32m  const nextAction = hasSnapshot[m
+[32m+[m[32m    ? "Review disputable items and start Round 1."[m
+[32m+[m[32m    : "Connect MyFreeScoreNow to pull your Snapshot.";[m
+[32m+[m
+   const nextHref = hasSnapshot ? "/dashboard/disputes" : "/go/mfsn";[m
+   const nextCta = hasSnapshot ? "Go to Disputes →" : "Connect MyFreeScoreNow →";[m
+ [m
+[36m@@ -98,7 +93,7 @@[m [mexport default async function DashboardPage() {[m
+ [m
+   return ([m
+     <main className="min-h-screen relative overflow-hidden bg-gradient-to-b from-black via-slate-950 to-black text-slate-100">[m
+[31m-      {/* Neon ambient background (safe + contained) */}[m
+[32m+[m[32m      {/* Ambient neon background */}[m
+       <div className="pointer-events-none absolute inset-0">[m
+         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />[m
+         <div className="absolute -top-20 right-[-120px] h-[520px] w-[520px] rounded-full bg-fuchsia-500/10 blur-3xl" />[m
+[36m@@ -157,9 +152,9 @@[m [mexport default async function DashboardPage() {[m
+       </header>[m
+ [m
+       <div className="relative z-10 mx-auto max-w-7xl px-4 md:px-6 py-8 md:py-12 space-y-8">[m
+[31m-        {/* HERO: Score room */}[m
+[32m+[m[32m        {/* HERO */}[m
+         <section className="relative rounded-3xl border border-slate-800/60 bg-gradient-to-br from-slate-900/70 to-black/80 p-6 md:p-10 lg:p-12 shadow-2xl overflow-hidden">[m
+[31m-          {/* Corner neon lines */}[m
+[32m+[m[32m          {/* Neon frame lines */}[m
+           <div className="pointer-events-none absolute inset-0 opacity-60">[m
+             <div className="absolute top-0 left-0 h-[1px] w-full bg-gradient-to-r from-cyan-400/30 via-transparent to-fuchsia-400/30" />[m
+             <div className="absolute bottom-0 left-0 h-[1px] w-full bg-gradient-to-r from-transparent via-teal-400/25 to-transparent" />[m
+[36m@@ -168,67 +163,25 @@[m [mexport default async function DashboardPage() {[m
+           </div>[m
+ [m
+           <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">[m
+[31m-            {/* Left: Big meter */}[m
+[32m+[m[32m            {/* Left: Gauge + Next Action */}[m
+             <div className="text-center">[m
+               <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-slate-400 mb-5">[m
+                 Credit Summary[m
+               </p>[m
+ [m
+[31m-              {/* Half-ring neon gauge (logo-style) */}[m
+[31m-              <div className="relative mx-auto w-[320px] h-[200px] sm:w-[420px] sm:h-[260px] lg:w-[520px] lg:h-[320px]">[m
+[31m-                <svg viewBox="0 0 1000 600" className="w-full h-full">[m
+[31m-                  <defs>[m
+[31m-                    <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="0%">[m
+[31m-                      <stop offset="0%" stopColor="#06b6d4" />[m
+[31m-                      <stop offset="55%" stopColor="#14b8a6" />[m
+[31m-                      <stop offset="100%" stopColor="#d946ef" />[m
+[31m-                    </linearGradient>[m
+[31m-[m
+[31m-                    <filter id={glowId} x="-50%" y="-50%" width="200%" height="200%">[m
+[31m-                      <feGaussianBlur stdDeviation="10" result="blur" />[m
+[31m-                      <feMerge>[m
+[31m-                        <feMergeNode in="blur" />[m
+[31m-                        <feMergeNode in="SourceGraphic" />[m
+[31m-                      </feMerge>[m
+[31m-                    </filter>[m
+[31m-                  </defs>[m
+[31m-[m
+[31m-                  {/* Track */}[m
+[31m-                  <path[m
+[31m-                    d="M 150 450 A 350 350 0 0 1 850 450"[m
+[31m-                    fill="none"[m
+[31m-                    stroke="rgba(148,163,184,0.18)"[m
+[31m-                    strokeWidth="90"[m
+[31m-                    strokeLinecap="round"[m
+[31m-                  />[m
+[31m-[m
+[31m-                  {/* Progress */}[m
+[31m-                  <path[m
+[31m-                    d="M 150 450 A 350 350 0 0 1 850 450"[m
+[31m-                    fill="none"[m
+[31m-                    stroke={`url(#${gradId})`}[m
+[31m-                    strokeWidth="90"[m
+[31m-                    strokeLinecap="round"[m
+[31m-                    pathLength={100}[m
+[31m-                    strokeDasharray={100}[m
+[31m-                    strokeDashoffset={100 - pct}[m
+[31m-                    filter={`url(#${glowId})`}[m
+[31m-                  />[m
+[31m-                </svg>[m
+[31m-[m
+[31m-                {/* Center content */}[m
+[31m-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-10">[m
+[31m-                  <div className="text-5xl sm:text-6xl lg:text-7xl font-black bg-gradient-to-br from-cyan-400 via-teal-300 to-fuchsia-400 bg-clip-text text-transparent">[m
+[31m-                    {avg || "--"}[m
+[31m-                  </div>[m
+[31m-                  <div className="mt-2 text-xs sm:text-sm text-slate-400">3-bureau average score</div>[m
+[31m-                  <div className="mt-3 text-[11px] sm:text-xs text-slate-500">[m
+[31m-                    Latest available snapshot • Scores update as data refreshes[m
+[31m-                  </div>[m
+[32m+[m[32m              {/* ✅ NeonGauge is used INSIDE the component (no more avg errors) */}[m
+[32m+[m[32m              <div className="mx-auto max-w-[560px]">[m
+[32m+[m[32m                <NeonGauge[m
+[32m+[m[32m                  value={avg || 0}[m
+[32m+[m[32m                  label={avg ? `${avg}` : "--"}[m
+[32m+[m[32m                  sublabel="3-b
