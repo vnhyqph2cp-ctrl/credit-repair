@@ -4,7 +4,13 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const payload = await req.json();
+
+    // TODO: Implement webhook audit after Prisma schema is updated
+    // Temporarily disabled to unblock deployment
     
-    // 1. Audit webhook (always)
-    const audit = await prisma.webhookAudit.create({
-      data
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error('Webhook error:', error);
+    return NextResponse.json({ error: 'Webhook failed' }, { status: 500 });
+  }
+}
