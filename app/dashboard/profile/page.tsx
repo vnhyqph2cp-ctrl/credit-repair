@@ -1,4 +1,4 @@
-﻿import { createServerClient } from '@/lib/supabase-server';
+﻿import { createServerSupabase } from '@/lib/supabase-server';
 
 export default async function ProfilePage() {
   const supabase = createServerClient();
