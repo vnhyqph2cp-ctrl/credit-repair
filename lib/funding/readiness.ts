@@ -1,172 +1,217 @@
-// lib/funding/readiness.ts
-import { createClient } from "@/lib/supabase/server";
-import { logBandChange } from "@/lib/funding/telemetry";
+/**
+ * 3B ANALYZER + MAIL ENFORCEMENT DOCTRINE
+ * =====================================
+ *
+ * DEFINITIONS ONLY
+ *
+ * This is NOT a credit-repair workflow.
+ * This is a compliance enforcement model.
+ *
+ * Evidence-driven.
+ * Time-aware (but not time-executing).
+ * Procedure-first.
+ * Emotion-free.
+ *
+ * ⚠️ No side effects allowed in this file.
+ */
 
-export type FundingBand = "BUILD" | "ALMOST" | "READY";
+/* ──────────────────────────────────────────────
+   VIOLATION TYPES
+   ────────────────────────────────────────────── */
 
-export type FundingReadinessResult = {
-  frs: number;
-  band: FundingBand;
-  breakdown: {
-    credit: number;
-    utilization: number;
-    derogatories: number;
-    accounts: number;
-    club: number;
-  };
+export type ViolationType =
+  | 'DAY_31_TIMEOUT'
+  | 'IDENTITY_STALL'
+  | 'ADDRESS_CYCLING'
+  | 'GENERIC_STALL'
+  | 'CLOCK_MANIPULATION'
+  | 'INCOMPLETE_INVESTIGATION'
+  | 'REINSERTION_NO_NOTICE';
+
+/* ──────────────────────────────────────────────
+   ROUND STATUS (STATE MACHINE)
+   ────────────────────────────────────────────── */
+
+export type RoundStatus =
+  | 'IDENTITY_VERIFICATION'
+  | 'INVESTIGATION_PENDING'
+  | 'RESPONSE_RECEIVED'
+  | 'STALLED'
+  | 'VIOLATION_DETECTED'
+  | 'ESCALATION_REQUIRED'
+  | 'RESOLVED_DELETED'
+  | 'RESOLVED_VERIFIED'
+  | 'RESOLVED_UPDATED'
+  | 'NO_RESPONSE';
+
+/* ──────────────────────────────────────────────
+   MAIL CLASSIFICATION
+   ────────────────────────────────────────────── */
+
+export type MailClassification =
+  | 'VERIFICATION_REQUEST'
+  | 'VERIFICATION_ACCEPTED'
+  | 'STALL_LETTER'
+  | 'GENERIC_RESPONSE'
+  | 'PARTIAL_UPDATE'
+  | 'NO_RESPONSE'
+  | 'DELETION_CONFIRMATION'
+  | 'REINSERTION_NOTICE'
+  | 'PROCEDURAL_FAILURE'
+  | 'FURNISHER_RESPONSE';
+
+/* ──────────────────────────────────────────────
+   MAIL CLASSIFICATION METADATA
+   ────────────────────────────────────────────── */
+
+export const MAIL_CLASSIFICATION_INFO: Record<
+  MailClassification,
+  {
+    label: string;
+    description: string;
+    triggersViolation: boolean;
+    requiresEscalation: boolean;
+    color: 'neutral' | 'warning' | 'error' | 'success';
+  }
+> = {
+  VERIFICATION_REQUEST: {
+    label: 'Verification Request',
+    description: 'Bureau requesting identity verification (Round 1 only)',
+    triggersViolation: false,
+    requiresEscalation: false,
+    color: 'neutral',
+  },
+  VERIFICATION_ACCEPTED: {
+    label: 'Verification Accepted',
+    description: 'Identity verified, investigation proceeding',
+    triggersViolation: false,
+    requiresEscalation: false,
+    color: 'success',
+  },
+  STALL_LETTER: {
+    label: 'Stall Letter',
+    description: 'Post-verification delay or ID re-request',
+    triggersViolation: true,
+    requiresEscalation: true,
+    color: 'error',
+  },
+  GENERIC_RESPONSE: {
+    label: 'Generic Response',
+    description: 'Boilerplate acknowledgment with no results',
+    triggersViolation: true,
+    requiresEscalation: false,
+    color: 'warning',
+  },
+  PARTIAL_UPDATE: {
+    label: 'Partial Update',
+    description: 'Some items addressed, others ignored',
+    triggersViolation: false,
+    requiresEscalation: false,
+    color: 'warning',
+  },
+  NO_RESPONSE: {
+    label: 'No Response',
+    description: 'No bureau communication within statutory window',
+    triggersViolation: true,
+    requiresEscalation: true,
+    color: 'error',
+  },
+  DELETION_CONFIRMATION: {
+    label: 'Deletion Confirmation',
+    description: 'Item removed from credit report',
+    triggersViolation: false,
+    requiresEscalation: false,
+    color: 'success',
+  },
+  REINSERTION_NOTICE: {
+    label: 'Reinsertion Notice',
+    description: 'Deleted item re-added',
+    triggersViolation: false,
+    requiresEscalation: true,
+    color: 'error',
+  },
+  PROCEDURAL_FAILURE: {
+    label: 'Procedural Failure',
+    description: 'Address cycling, clock manipulation, etc.',
+    triggersViolation: true,
+    requiresEscalation: true,
+    color: 'error',
+  },
+  FURNISHER_RESPONSE: {
+    label: 'Furnisher Response',
+    description: 'Direct response from data furnisher',
+    triggersViolation: false,
+    requiresEscalation: false,
+    color: 'neutral',
+  },
 };
 
-/**
- * Funding Readiness Score (FRS)
- * Internal decision score (0–100). NOT a credit score.
- */
-export async function calculateFundingReadiness(
-  userId: string
-): Promise<FundingReadinessResult> {
-  const supabase = await createClient();
+/* ──────────────────────────────────────────────
+   VIOLATION METADATA
+   ────────────────────────────────────────────── */
 
-  // -----------------------------
-  // 1. Load latest Snapshot
-  // -----------------------------
-  const { data: snapshot } = await supabase
-    .from("Snapshot")
-    .select("*")
-    .eq("customerId", userId)
-    .order("createdAt", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (!snapshot) {
-    throw new Error("No Snapshot found for user");
+export const VIOLATION_INFO: Record<
+  ViolationType,
+  {
+    label: string;
+    description: string;
+    severity: 'minor' | 'major' | 'critical';
+    remedyAction: string;
   }
+> = {
+  DAY_31_TIMEOUT: {
+    label: 'Day 31+ Timeout',
+    description: 'No response within statutory timeline',
+    severity: 'critical',
+    remedyAction: 'Item must be deleted. Escalate immediately.',
+  },
+  IDENTITY_STALL: {
+    label: 'Identity Stall',
+    description: 'ID requested after verification completed',
+    severity: 'major',
+    remedyAction: 'Reject request and escalate if repeated.',
+  },
+  ADDRESS_CYCLING: {
+    label: 'Address Cycling',
+    description: 'Repeated address mismatch claims',
+    severity: 'major',
+    remedyAction: 'Document pattern and escalate.',
+  },
+  GENERIC_STALL: {
+    label: 'Generic Stall',
+    description: 'Non-substantive acknowledgment',
+    severity: 'minor',
+    remedyAction: 'Monitor for Day 31 timeout.',
+  },
+  CLOCK_MANIPULATION: {
+    label: 'Clock Manipulation',
+    description: 'Attempt to reset statutory timeline',
+    severity: 'critical',
+    remedyAction: 'Reject reset and escalate.',
+  },
+  INCOMPLETE_INVESTIGATION: {
+    label: 'Incomplete Investigation',
+    description: 'Not all disputed items addressed',
+    severity: 'major',
+    remedyAction: 'Demand completion.',
+  },
+  REINSERTION_NO_NOTICE: {
+    label: 'Reinsertion Without Notice',
+    description: 'Item reinserted without required notice',
+    severity: 'critical',
+    remedyAction: 'Immediate deletion required.',
+  },
+};
 
-  // -----------------------------
-  // 2. Load normalized data
-  // -----------------------------
-  const [{ data: tradelines }, { data: club }] = await Promise.all([
-    supabase
-      .from("tradelines")
-      .select("is_derogatory, status")
-      .eq("user_id", userId),
+/* ──────────────────────────────────────────────
+   ENFORCEMENT CONSTANTS (READ-ONLY)
+   ────────────────────────────────────────────── */
 
-    supabase
-      .from("boost_club_members")
-      .select("tier")
-      .eq("user_id", userId)
-      .single(),
-  ]);
-
-  // -----------------------------
-  // 3. CREDIT SCORE (30)
-  // -----------------------------
-  const scores = [
-    snapshot.score_tu,
-    snapshot.score_eq,
-    snapshot.score_ex,
-  ].filter(Boolean) as number[];
-
-  const avgScore =
-    scores.length > 0
-      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
-      : 0;
-
-  let credit = 5;
-  if (avgScore >= 760) credit = 30;
-  else if (avgScore >= 720) credit = 25;
-  else if (avgScore >= 680) credit = 20;
-  else if (avgScore >= 640) credit = 15;
-  else if (avgScore >= 600) credit = 10;
-
-  // -----------------------------
-  // 4. UTILIZATION (25)
-  // -----------------------------
-  const utilizationPct = snapshot.utilization_percent ?? 100;
-
-  let utilization = 0;
-  if (utilizationPct <= 10) utilization = 25;
-  else if (utilizationPct <= 30) utilization = 20;
-  else if (utilizationPct <= 50) utilization = 12;
-  else if (utilizationPct <= 70) utilization = 5;
-
-  // -----------------------------
-  // 5. DEROGATORIES (25)
-  // -----------------------------
-  const derogCount =
-    tradelines?.filter((t) => t.is_derogatory).length ?? 0;
-
-  let derogatories = 0;
-  if (derogCount === 0) derogatories = 25;
-  else if (derogCount <= 2) derogatories = 15;
-  else if (derogCount <= 5) derogatories = 5;
-
-  // -----------------------------
-  // 6. ACCOUNT DEPTH (10)
-  // -----------------------------
-  const openAccounts =
-    tradelines?.filter((t) => t.status === "open").length ?? 0;
-
-  let accounts = 0;
-  if (openAccounts >= 5) accounts = 10;
-  else if (openAccounts >= 3) accounts = 7;
-  else if (openAccounts >= 1) accounts = 4;
-
-  // -----------------------------
-  // 7. CLUB TIER (10)
-  // -----------------------------
-  let clubPoints = 0;
-  switch (club?.tier) {
-    case "legend":
-      clubPoints = 10;
-      break;
-    case "elite":
-      clubPoints = 8;
-      break;
-    case "builder":
-      clubPoints = 5;
-      break;
-    case "starter":
-      clubPoints = 2;
-      break;
-  }
-
-  // -----------------------------
-  // 8. FINAL SCORE + BAND
-  // -----------------------------
-  const frs =
-    credit + utilization + derogatories + accounts + clubPoints;
-
-  const band: FundingBand =
-    frs >= 80 ? "READY" : frs >= 60 ? "ALMOST" : "BUILD";
-
-  // -----------------------------
-  // 9. Band Change Logging
-  // -----------------------------
-  const { data: lastBand } = await supabase
-    .from("funding_band_events")
-    .select("to_band")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .single();
-
-  if (!lastBand || lastBand.to_band !== band) {
-    await logBandChange(
-      userId,
-      lastBand?.to_band ?? null,
-      band,
-      frs
-    );
-  }
-
-  return {
-    frs,
-    band,
-    breakdown: {
-      credit,
-      utilization,
-      derogatories,
-      accounts,
-      club: clubPoints,
-    },
-  };
-}
+export const ENFORCEMENT_CONSTANTS = {
+  INVESTIGATION_DEADLINE_DAYS: 30,
+  GRACE_PERIOD_DAYS: 1,
+  REINSERTION_NOTICE_DAYS: 5,
+  ROUND_1_MANDATORY_VERIFICATION: true,
+  ADDRESS_CYCLING_THRESHOLD: 2,
+  GENERIC_STALL_THRESHOLD: 1,
+} as const;

@@ -14,54 +14,47 @@ const supabaseAdmin = createClient(
 
 /**
  * Attach referral code to new user after signup
- * 
- * This runs server-side only with service-role privileges to:
- * 1. Validate the referral code exists and belongs to a reseller
- * 2. Securely attach reseller_id to the new user's profile
- * 3. Prevent client-side manipulation of referral attribution
- * 
- * Called from /register after successful signup
+ *
+ * Server-side only (service role).
+ * Silent failure by design.
  */
 export async function POST(req: Request) {
   try {
     const { user_id, ref } = await req.json();
 
-    // Silent success if no referral code provided
+    // Silent success if no referral
     if (!user_id || !ref) {
       return NextResponse.json({ ok: true });
     }
 
-    // Look up reseller by referral code
-    const { data: reseller, error: lookupError } = await supabaseAdmin
+    // Find reseller
+    const { data: reseller } = await supabaseAdmin
       .from("Customer")
       .select("id")
-      .eq("referral_code", ref)
+      .eq("referralCode", ref)
       .eq("role", "reseller")
       .maybeSingle();
 
-    // Silent success if referral code invalid (don't block signup)
-    if (lookupError || !reseller) {
-      console.warn(`Invalid referral code: ${ref}`);
+    if (!reseller) {
       return NextResponse.json({ ok: true, attached: false });
     }
 
-    // Attach reseller_id to new user
-    const { error: updateError } = await supabaseAdmin
+    // Attach only if not already set
+    const { error } = await supabaseAdmin
       .from("Customer")
-      .update({ reseller_id: reseller.id })
-      .eq("id", user_id);
+      .update({ resellerId: reseller.id })
+      .eq("id", user_id)
+      .is("resellerId", null);
 
-    if (updateError) {
-      console.error("Failed to attach referral:", updateError);
+    if (error) {
+      console.error("Referral attach failed:", error);
       return NextResponse.json({ ok: true, attached: false });
     }
 
-    console.log(`✅ Referral attached: User ${user_id} → Reseller ${reseller.id}`);
+    console.log(`✅ Referral attached: ${user_id} → ${reseller.id}`);
     return NextResponse.json({ ok: true, attached: true });
-
   } catch (err) {
-    console.error("Unexpected error in attach-referral:", err);
-    // Silent success - don't block signup for referral errors
+    console.error("attach-referral crash:", err);
     return NextResponse.json({ ok: true, attached: false });
   }
 }

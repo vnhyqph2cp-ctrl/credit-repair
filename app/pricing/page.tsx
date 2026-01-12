@@ -1,298 +1,219 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 export default function PricingPage() {
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+
+  const toggleFaq = (id: string) =>
+    setOpenFaq((prev) => (prev === id ? null : id));
+
   return (
-    <main className="min-h-screen bg-[#070A12] text-slate-50">
-      <div className="landing-center" style={{ textAlign: "left", paddingTop: 48, paddingBottom: 72 }}>
+    <main className="min-h-screen bg-black text-white">
+      <div className="max-w-6xl mx-auto px-6 py-16 space-y-16">
+
         {/* Header */}
-        <header style={{ marginBottom: 32 }}>
+        <header className="text-center space-y-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm opacity-70 hover:opacity-100 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-neon-teal hover:underline"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-            Back to Home
+            ← Back to Home
           </Link>
 
-          <p
-            style={{
-              fontSize: 12,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              opacity: 0.7,
-              marginBottom: 6,
-            }}
-          >
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">
             Simple, transparent plans
           </p>
-          <h1 className="landing-headline" style={{ fontSize: "2.6rem" }}>
+
+          <h1 className="text-3xl font-semibold">
             Choose your 3B plan
           </h1>
-          <p
-            className="landing-subhead"
-            style={{ margin: "8px 0 0 0", maxWidth: 520 }}
-          >
-            No hidden fees. Cancel anytime. Start with a free Snapshot and
-            upgrade when you are ready for automation.
+
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+            Connect your MyFreeScoreNow monitoring, unlock the 3B Analyzer, and
+            choose how much help you want with disputes.
           </p>
         </header>
 
-        {/* Pricing cards */}
-        <section style={{ marginBottom: 40 }}>
-          <div
-            className="pricing-grid"
-            style={{ rowGap: 24, columnGap: 24 }}
-          >
-            {/* Free Snapshot */}
-            <div className="surface-card">
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  opacity: 0.8,
-                  marginBottom: 8,
-                }}
-              >
-                Free
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                Credit Snapshot
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-                $0
-              </div>
-              <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 14 }}>
-                Get started with a 3‑bureau view and basic summary.
-              </p>
+        {/* Pricing */}
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Plan
+            title="3B Dashboard"
+            price="$0/mo*"
+            description="Bring your MyFreeScoreNow monitoring into 3B."
+            features={[
+              "Requires active MyFreeScoreNow monitoring",
+              "3-bureau Snapshot inside 3B",
+              "Score tracking & alerts",
+            ]}
+            disabled={[
+              "3B Analyzer",
+              "Dispute tools",
+            ]}
+            cta="Start free"
+          />
 
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 16px 0",
-                  fontSize: 13,
-                  opacity: 0.9,
-                }}
-              >
-                <li>• 3‑bureau Snapshot</li>
-                <li>• Basic credit summary</li>
-                <li>• Monthly updates</li>
-                <li style={{ opacity: 0.5 }}>• AI Analyzer (not included)</li>
-                <li style={{ opacity: 0.5 }}>• Dispute tools (not included)</li>
-              </ul>
+          <Plan
+            title="Analyzer & DIY"
+            price="$49.99 / run"
+            description="One deep-dive Analyzer session with a DIY action plan."
+            features={[
+              "Full 3B Analyzer",
+              "Personalized strategy",
+              "DIY dispute builder",
+              "Smart pacing (3–5 items)",
+            ]}
+            cta="Unlock Analyzer"
+          />
 
-              <Link href="/register" className="btn btn-large glow-neon">
-                Get started free
-              </Link>
-            </div>
+          <Plan
+            highlight
+            title="3B Co-Pilot"
+            price="$89 / mo"
+            description="We prepare disputes, you approve every move."
+            features={[
+              "Everything in Analyzer & DIY",
+              "3–5 disputes per round",
+              "Approval before sending",
+              "Optional LetterStream add-on",
+            ]}
+            cta="Start with Co-Pilot"
+          />
 
-            {/* Basic */}
-            <div className="surface-card">
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  opacity: 0.8,
-                  marginBottom: 8,
-                }}
-              >
-                Basic
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                Credit Builder
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-                $29<span style={{ fontSize: 14 }}>/mo</span>
-              </div>
-              <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 14 }}>
-                Core tools to track and build your credit.
-              </p>
-
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 16px 0",
-                  fontSize: 13,
-                  opacity: 0.9,
-                }}
-              >
-                <li>• Everything in Free</li>
-                <li>• Weekly credit monitoring</li>
-                <li>• Score tracking & trends</li>
-                <li>• Progress dashboard</li>
-                <li style={{ opacity: 0.5 }}>• AI Analyzer (not included)</li>
-              </ul>
-
-              <Link href="/register" className="btn btn-large glow-soft">
-                Start building
-              </Link>
-            </div>
-
-            {/* Analyzer – featured */}
-            <div
-              className="surface-card"
-              style={{
-                border: "1px solid rgba(45,212,191,0.7)",
-                boxShadow: "0 0 30px rgba(45,212,191,0.35)",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  color: "#22d3ee",
-                  marginBottom: 8,
-                }}
-              >
-                Most popular
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                AI Analyzer
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-                $79<span style={{ fontSize: 14 }}>/mo</span>
-              </div>
-              <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 14 }}>
-                AI‑powered analysis, action plan, and dispute automation.
-              </p>
-
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 16px 0",
-                  fontSize: 13,
-                  opacity: 0.95,
-                }}
-              >
-                <li>• Everything in Basic</li>
-                <li>• AI credit Analyzer</li>
-                <li>• Personalized action plan</li>
-                <li>• Dispute letter generator</li>
-                <li>• Priority support</li>
-              </ul>
-
-              <Link href="/register" className="btn btn-large glow-neon">
-                Start optimizing
-              </Link>
-            </div>
-
-            {/* Ultimate */}
-            <div className="surface-card">
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  letterSpacing: 2,
-                  textTransform: "uppercase",
-                  color: "#f472ff",
-                  marginBottom: 8,
-                }}
-              >
-                Ultimate
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-                Full service
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
-                $149<span style={{ fontSize: 14 }}>/mo</span>
-              </div>
-              <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 14 }}>
-                Done‑with‑you enforcement and funding readiness.
-              </p>
-
-              <ul
-                style={{
-                  listStyle: "none",
-                  padding: 0,
-                  margin: "0 0 16px 0",
-                  fontSize: 13,
-                  opacity: 0.95,
-                }}
-              >
-                <li>• Everything in Analyzer</li>
-                <li>• Automated dispute rounds</li>
-                <li>• Legal document library</li>
-                <li>• Dedicated success manager</li>
-                <li>• Funding readiness tools</li>
-              </ul>
-
-              <Link href="/register" className="btn btn-large glow-soft">
-                Go Ultimate
-              </Link>
-            </div>
-          </div>
+          <Plan
+            title="Full Service"
+            price="$149 / mo"
+            description="End-to-end enforcement management."
+            features={[
+              "Everything in Co-Pilot",
+              "We choose highest-impact items",
+              "LetterStream included",
+              "CFPB escalation if needed",
+            ]}
+            cta="Go Full Service"
+          />
         </section>
 
-        {/* FAQ / CTA */}
-        <section style={{ marginTop: 8 }}>
-          <div style={{ marginBottom: 24 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
-              Common questions
-            </h2>
-            <p style={{ fontSize: 14, opacity: 0.8 }}>
-              Cancel anytime. No long‑term contracts. Clear pricing from day one.
-            </p>
-          </div>
+        {/* FAQ */}
+        <section className="max-w-3xl mx-auto space-y-4">
+          <h2 className="text-2xl font-semibold text-center">
+            Common questions
+          </h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-              gap: 16,
-              marginBottom: 32,
-            }}
+          <Faq
+            id="cancel"
+            title="Can I cancel anytime?"
+            openFaq={openFaq}
+            toggleFaq={toggleFaq}
           >
-            <div className="surface-card">
-              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-                Can I cancel anytime?
-              </h3>
-              <p style={{ fontSize: 13, opacity: 0.8 }}>
-                Yes. No penalties or long‑term commitments.
-              </p>
-            </div>
-            <div className="surface-card">
-              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
-                Can I upgrade or downgrade?
-              </h3>
-              <p style={{ fontSize: 13, opacity: 0.8 }}>
-                Switch plans whenever your goals change.
-              </p>
-            </div>
-          </div>
+            Yes. You can cancel future months at any time. Completed work is
+            non-refundable.
+          </Faq>
 
-          <div
-            className="surface-card glow-soft"
-            style={{ textAlign: "center" }}
+          <Faq
+            id="mfsn"
+            title="Do I need MyFreeScoreNow?"
+            openFaq={openFaq}
+            toggleFaq={toggleFaq}
           >
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>
-              Ready to transform your credit?
-            </h2>
-            <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 16 }}>
-              Join 3B Credit Builder and let the system do the heavy lifting.
-            </p>
-            <Link href="/register" className="btn btn-large glow-neon">
-              Get started today
-            </Link>
-          </div>
+            Yes. Live 3-bureau data from MyFreeScoreNow powers the Analyzer.
+          </Faq>
+
+          <Faq
+            id="disputes"
+            title="How many items do you dispute?"
+            openFaq={openFaq}
+            toggleFaq={toggleFaq}
+          >
+            We focus on 3–5 high-impact items per bureau per round.
+          </Faq>
         </section>
+
+        {/* CTA */}
+        <section className="rounded-xl border border-white/10 bg-black/30 p-8 text-center space-y-4">
+          <h2 className="text-2xl font-semibold">
+            Ready to start your 90-day run?
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Connect monitoring, unlock the Analyzer, and choose your support
+            level.
+          </p>
+          <Link
+            href="/register"
+            className="inline-flex rounded-full bg-neon-teal px-6 py-3 font-semibold text-black hover:brightness-110"
+          >
+            Get started today
+          </Link>
+        </section>
+
       </div>
     </main>
+  );
+}
+
+/* ---------- helpers ---------- */
+
+function Plan({
+  title,
+  price,
+  description,
+  features,
+  disabled = [],
+  cta,
+  highlight,
+}: any) {
+  return (
+    <div
+      className={`rounded-xl border p-6 space-y-4 ${
+        highlight
+          ? "border-neon-teal bg-black/40"
+          : "border-white/10 bg-black/30"
+      }`}
+    >
+      <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="text-2xl font-bold">{price}</p>
+      <p className="text-sm text-muted-foreground">{description}</p>
+
+      <ul className="text-sm space-y-1">
+        {features.map((f: string) => (
+          <li key={f}>• {f}</li>
+        ))}
+        {disabled.map((d: string) => (
+          <li key={d} className="opacity-40">
+            • {d} (not included)
+          </li>
+        ))}
+      </ul>
+
+      <Link
+        href="/register"
+        className="inline-flex justify-center w-full rounded-lg bg-neon-teal px-4 py-2 font-semibold text-black"
+      >
+        {cta}
+      </Link>
+    </div>
+  );
+}
+
+function Faq({
+  id,
+  title,
+  children,
+  openFaq,
+  toggleFaq,
+}: any) {
+  const open = openFaq === id;
+
+  return (
+    <button
+      onClick={() => toggleFaq(id)}
+      className="w-full text-left rounded-xl border border-white/10 bg-black/30 p-4"
+    >
+      <h3 className="font-semibold mb-1">{title}</h3>
+      {open && (
+        <p className="text-sm text-muted-foreground">{children}</p>
+      )}
+    </button>
   );
 }

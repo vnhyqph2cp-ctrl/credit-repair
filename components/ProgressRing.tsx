@@ -2,53 +2,59 @@
 
 type ProgressRingProps = {
   percent: number;
+  size?: number;
 };
 
-export default function ProgressRing({ percent }: ProgressRingProps) {
-  const radius = 28;
+export default function ProgressRing({
+  percent,
+  size = 64,
+}: ProgressRingProps) {
+  const clamped = Math.min(100, Math.max(0, percent));
+  const radius = (size - 8) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
+  const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className="progress-ring" style={{ position: "relative", width: 64, height: 64 }}>
-      <svg width="64" height="64" style={{ transform: "rotate(-90deg)" }}>
-        {/* Background circle */}
+    <div
+      className="relative"
+      style={{ width: size, height: size }}
+      aria-label={`Progress: ${clamped}%`}
+    >
+      <svg
+        width={size}
+        height={size}
+        className="rotate-[-90deg]"
+      >
+        {/* Background */}
         <circle
-          cx="32"
-          cy="32"
+          cx={size / 2}
+          cy={size / 2}
           r={radius}
           fill="none"
           stroke="rgba(255,255,255,0.08)"
           strokeWidth="6"
         />
-        {/* Progress circle */}
+
+        {/* Progress */}
         <circle
-          cx="32"
-          cy="32"
+          cx={size / 2}
+          cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgb(var(--accent))"
+          stroke="rgb(34,211,238)" /* neon aqua */
           strokeWidth="6"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          style={{
-            transition: "stroke-dashoffset 600ms ease",
-          }}
+          className="transition-all duration-700 ease-out drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]"
         />
       </svg>
-      <div
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          fontSize: "14px",
-          fontWeight: 700,
-          color: "rgb(var(--accent))",
-        }}
-      >
-        {percent}%
+
+      {/* Center label */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-sm font-bold text-neon-aqua">
+          {clamped}%
+        </span>
       </div>
     </div>
   );

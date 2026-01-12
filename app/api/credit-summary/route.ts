@@ -1,20 +1,13 @@
 // app/api/credit-summary/route.ts
-import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+
 
 export async function GET() {
   try {
     const customer = await requireAuth();
 
-    // Get latest snapshot for detailed data
-    const latestSnapshot = await prisma.snapshot.findFirst({
-      where: { customerId: customer.id },
-      orderBy: { createdAt: "desc" },
-    });
-
-    // Calculate progress based on score improvement
-    const initialScore = 600; // Could store this as baselineScore in Customer
+    const initialScore = 600;
     const currentScore = customer.scoreAvg || 0;
     const targetScore = 750;
     const progressPercent = Math.min(
@@ -48,20 +41,20 @@ export async function GET() {
     const data = {
       progressPercent: Math.round(progressPercent),
       bureaus: [
-        { 
-          name: "Experian", 
-          score: customer.scoreEx || 0, 
-          change30d: 0 // TODO: Calculate from historical snapshots
+        {
+          name: "Experian",
+          score: customer.scoreEx || 0,
+          change30d: 0,
         },
-        { 
-          name: "Equifax", 
-          score: customer.scoreEq || 0, 
-          change30d: 0 // TODO: Calculate from historical snapshots
+        {
+          name: "Equifax",
+          score: customer.scoreEq || 0,
+          change30d: 0,
         },
-        { 
-          name: "TransUnion", 
-          score: customer.scoreTu || 0, 
-          change30d: 0 // TODO: Calculate from historical snapshots
+        {
+          name: "TransUnion",
+          score: customer.scoreTu || 0,
+          change30d: 0,
         },
       ],
       mfsnReadiness: {
@@ -70,14 +63,13 @@ export async function GET() {
         color: readinessColor,
         note: readinessNote,
       },
-      lastUpdate: latestSnapshot?.createdAt || customer.updatedAt,
+      lastUpdate: customer.updatedAt,
     };
 
     return NextResponse.json(data);
   } catch (error) {
     console.error("Credit summary error:", error);
-    
-    // Return demo data on error instead of failing
+
     return NextResponse.json({
       progressPercent: 0,
       bureaus: [

@@ -1,7 +1,4 @@
 "use client";
-import { CreditGauge } from "@/components/ui/CreditGauge";
-
-
 
 export default function HomePage() {
   return (
@@ -23,16 +20,10 @@ export default function HomePage() {
           <a href="/about" className="hover:underline">About</a>
           <a href="/pricing" className="hover:underline">Pricing</a>
           <a
-            href="/dashboard/mfsn/verify-pending"
-            className="hover:underline"
-          >
-            MFSN Login
-          </a>
-          <a
             href="/login"
             className="btn glow-soft px-4 py-2"
           >
-            3B Login
+            Member Login
           </a>
         </nav>
       </header>
@@ -62,8 +53,8 @@ export default function HomePage() {
             <div className="tile-icon icon-purple">📊</div>
             <h3 className="tile-title">Free Credit Snapshot</h3>
             <p className="tile-description">
-              Pull your snapshot and see where you actually stand.
-              No signup required.
+              Pull your credit snapshot and see what’s inaccurate.
+              No account required.
             </p>
           </a>
 
@@ -75,19 +66,21 @@ export default function HomePage() {
             <div className="tile-icon icon-green">🔐</div>
             <h3 className="tile-title">3B Member Login</h3>
             <p className="tile-description">
-              Access your dashboard, disputes, and funding tools.
+              Access your dashboard, disputes, and enforcement tools.
             </p>
           </a>
 
           {/* MFSN */}
           <a
-            href="/dashboard/mfsn/verify-pending"
+            href="https://myfreescorenow.com/en/creditsnapshot/user/register/6153?source=default"
+            target="_blank"
+            rel="noopener noreferrer"
             className="feature-tile btn-mfsn"
           >
             <div className="tile-icon icon-blue">🧾</div>
-            <h3 className="tile-title">MFSN Returning Users</h3>
+            <h3 className="tile-title">Credit Monitoring</h3>
             <p className="tile-description">
-              Resume monitoring through MyFreeScoreNow.
+              Start or resume monitoring through MyFreeScoreNow.
             </p>
           </a>
         </div>

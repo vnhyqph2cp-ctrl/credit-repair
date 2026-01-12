@@ -2,90 +2,43 @@ import Link from "next/link";
 
 export default function SignupPage() {
   return (
-    <main className="min-h-screen bg-[#070A12] text-slate-50">
-      <div
-        className="landing-center"
-        style={{ textAlign: "left", paddingTop: 64, paddingBottom: 64 }}
-      >
-        {/* Header */}
-        <header style={{ marginBottom: 32 }}>
-          <p
-            style={{
-              fontSize: 12,
-              letterSpacing: 2,
-              textTransform: "uppercase",
-              opacity: 0.7,
-              marginBottom: 6,
-            }}
-          >
-            Get started
-          </p>
-          <h1 className="landing-headline" style={{ fontSize: "2.6rem" }}>
-            Join 3B Credit Builder
-          </h1>
-          <p
-            className="landing-subhead"
-            style={{ margin: "8px 0 0 0", maxWidth: 520 }}
-          >
-            Choose a plan, unlock the full system, and start executing your
-            credit strategy.
-          </p>
-        </header>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+      <div className="max-w-xl text-center space-y-6">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">
+          Get started
+        </p>
 
-        {/* Plan Cards */}
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-          <div className="surface-card">
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-              Basic
-            </h2>
-            <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 14 }}>
-              Core tools + tracking
-            </p>
-            <button className="btn btn-large glow-soft w-full">Select</button>
-          </div>
+        <h1 className="text-3xl font-semibold">
+          Join 3B Credit Builder
+        </h1>
 
-          <div
-            className="surface-card glow-soft"
-            style={{
-              border: "1px solid rgba(45,212,191,0.5)",
-            }}
-          >
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-              Pro
-            </h2>
-            <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 14 }}>
-              Automation + enforcement
-            </p>
-            <button className="btn btn-large glow-neon w-full">Select</button>
-          </div>
+        <p className="text-sm text-muted-foreground">
+          Connect your credit monitoring, run the 3B Analyzer, and choose the
+          level of support that fits your goals.
+        </p>
 
-          <div className="surface-card">
-            <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-              Elite
-            </h2>
-            <p style={{ fontSize: 13, opacity: 0.8, marginBottom: 14 }}>
-              Everything + priority
-            </p>
-            <button className="btn btn-large glow-soft w-full">Select</button>
-          </div>
-        </section>
-
-        {/* Login Link */}
-        <div style={{ textAlign: "center" }}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link
-            href="/login"
-            className="text-sm opacity-80 hover:opacity-100 underline"
+            href="/pricing"
+            className="rounded-full bg-neon-teal px-6 py-3 font-semibold text-black hover:brightness-110"
           >
-            Already a member? Login
+            View plans
+          </Link>
+
+          <Link
+            href="/register"
+            className="rounded-full border border-white/20 px-6 py-3 font-semibold hover:bg-white/5"
+          >
+            Create account
           </Link>
         </div>
+
+        <p className="text-sm text-muted-foreground pt-6">
+          Already a member?{" "}
+          <Link href="/login" className="text-neon-teal hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
     </main>
   );

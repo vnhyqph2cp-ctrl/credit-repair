@@ -369,3 +369,34 @@ body {
   opacity: 0.4;
   animation: float 8s ease-in-out infinite;
 }
+/* ===============================
+   Core Glow Utilities (Primitives)
+   =============================== */
+
+/* Soft neutral glow (buttons, CTAs) */
+.glow {
+  box-shadow:
+    0 0 18px rgba(99, 102, 241, 0.45),
+    0 0 36px rgba(99, 102, 241, 0.3);
+}
+
+/* Strong neutral glow (cards, featured blocks) */
+.glow-strong {
+  box-shadow:
+    0 0 28px rgba(255, 255, 255, 0.25),
+    0 0 60px rgba(255, 255, 255, 0.15),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Snapshot-specific glows */
+.glow-pink {
+  box-shadow:
+    0 0 60px rgba(236, 72, 153, 0.8),
+    0 0 120px rgba(236, 72, 153, 0.45);
+}
+
+.glow-green {
+  box-shadow:
+    0 0 60px rgba(34, 197, 94, 0.8),
+    0 0 120px rgba(34, 197, 94, 0.45);
+}

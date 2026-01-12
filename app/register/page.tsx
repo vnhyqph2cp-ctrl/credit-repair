@@ -1,84 +1,141 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
-import { Suspense } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase/client";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-function RegisterForm() {
+export default function RegisterPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const ref = params.get("ref");
 
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const email = form.get("email") as string;
-    const password = form.get("password") as string;
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    // Attach referral if present
-    if (ref && data.user) {
-      await fetch("/api/auth/attach-referral", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: data.user.id,
-          ref,
-        }),
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
       });
-    }
 
-    alert("Account created. You can sign in now.");
-    router.push("/login");
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // If session exists, user is auto-confirmed
+      if (data.session) {
+        router.replace("/dashboard");
+        return;
+      }
+
+      // Otherwise, email confirmation is required
+      setSuccess(
+        "Check your email to confirm your account before signing in."
+      );
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setError("Unable to create account. Please try again.");
+      setLoading(false);
+    }
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-white">
-      <form
-        onSubmit={handleRegister}
-        className="surface card glow-soft col gap-4 w-full max-w-sm"
-      >
-        <h1 className="text-xl font-semibold">Create your 3B account</h1>
+    <main
+      className="min-h-screen flex items-center justify-center p-6 relative"
+      style={{
+        backgroundImage: "url('/backgrounds/Login_Page.webp')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/60" />
 
-        {ref && (
-          <div className="surface-teal card col" style={{ padding: 12 }}>
-            <small className="text-muted">Referral code applied</small>
-            <strong style={{ fontSize: "14px", color: "rgb(var(--accent))" }}>
-              {ref}
-            </strong>
+      <div className="w-full max-w-md relative z-10">
+        <header className="text-center mb-8">
+          <h1 className="text-4xl font-black text-white mb-2">
+            Create your account
+          </h1>
+          <p className="text-muted-foreground">
+            Start building better credit today
+          </p>
+        </header>
+
+        <div className="rounded-2xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 shadow-2xl">
+          <form onSubmit={handleSignup} className="space-y-5">
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-neon-teal"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full rounded-lg bg-black/50 border border-white/10 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-neon-teal"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                At least 6 characters
+              </p>
+            </div>
+
+            {error && (
+              <div className="rounded-lg border border-red-800 bg-red-950/40 p-4 text-sm text-red-300">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="rounded-lg border border-green-800 bg-green-950/30 p-4 text-sm text-green-300">
+                {success}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-neon-teal px-6 py-3 font-semibold text-black hover:brightness-110 disabled:opacity-50"
+            >
+              {loading ? "Creating account…" : "Create Account"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-neon-teal font-semibold hover:underline"
+            >
+              Sign in
+            </Link>
           </div>
-        )}
-
-        <input name="email" type="email" placeholder="Email" required />
-        <input name="password" type="password" placeholder="Password" required />
-
-        <button className="btn glow-neon" type="submit">
-          Create Account
-        </button>
-
-        <a className="btn" href="/login">
-          Already have an account? Sign in
-        </a>
-      </form>
+        </div>
+      </div>
     </main>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <RegisterForm />
-    </Suspense>
   );
 }

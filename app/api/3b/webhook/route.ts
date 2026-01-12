@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -7,7 +6,7 @@ export async function POST(req: Request) {
 
     // TODO: Implement webhook audit after Prisma schema is updated
     // Temporarily disabled to unblock deployment
-    
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook error:', error);

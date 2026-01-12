@@ -1,7 +1,6 @@
 // lib/badgeMap.ts
 
 export type BadgeKey =
-  | "snapshot_complete"
   | "documents_uploaded"
   | "documents_verified"
   | "analysis_complete"
@@ -16,11 +15,6 @@ export const badgeMap: Record<
     icon: string; // emoji for v1 (swap to lucide later)
   }
 > = {
-  snapshot_complete: {
-    name: "Snapshot Complete",
-    description: "Credit snapshot successfully completed.",
-    icon: "📸",
-  },
   documents_uploaded: {
     name: "Documents Uploaded",
     description: "Required documents have been uploaded.",
@@ -33,17 +27,17 @@ export const badgeMap: Record<
   },
   analysis_complete: {
     name: "Analysis Complete",
-    description: "Your credit analysis is finished.",
+    description: "Your Epic Credit Report has been analyzed.",
     icon: "🧠",
   },
   action_plan_ready: {
     name: "Action Plan Ready",
-    description: "Your personalized action plan is available.",
+    description: "Your personalized dispute and enforcement plan is ready.",
     icon: "🗺️",
   },
   dispute_started: {
     name: "Dispute Started",
-    description: "Dispute process has begun.",
+    description: "The dispute and enforcement process has begun.",
     icon: "⚖️",
   },
 };

@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
+import { supabase } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function MFSNEnrollPage() {
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +35,9 @@ export default function MFSNEnrollPage() {
     setError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         setError("You must be logged in to connect MyFreeScoreNow.");
@@ -61,7 +60,7 @@ export default function MFSNEnrollPage() {
       const json = await res.json();
 
       if (!res.ok) {
-        setError(json.error ?? "Failed to start enrollment. Please try again.");
+        setError(json?.error ?? "Enrollment failed. Please try again.");
         setLoading(false);
         return;
       }
@@ -70,184 +69,94 @@ export default function MFSNEnrollPage() {
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-black text-white p-6">
-      <div className="max-w-2xl mx-auto">
-        <nav className="mb-6 text-sm text-slate-500">
-          <a href="/dashboard" className="hover:text-cyan-400">Dashboard</a>
-          <span className="mx-2">/</span>
-          <span className="text-slate-300">Connect MyFreeScoreNow</span>
-        </nav>
+    <div className="max-w-2xl space-y-8">
+      {/* Breadcrumb */}
+      <nav className="text-sm text-muted-foreground">
+        <Link href="/dashboard" className="hover:text-neon-teal">
+          Dashboard
+        </Link>
+        <span className="mx-2">/</span>
+        <span>Connect MyFreeScoreNow</span>
+      </nav>
 
-        <h1 className="text-3xl font-black">Connect MyFreeScoreNow</h1>
-        <p className="text-slate-300 mt-2">
-          Securely connect your MyFreeScoreNow account to pull your credit Snapshot into 3B Credit Builder.
+      <header className="space-y-2">
+        <h1 className="text-3xl font-semibold">
+          Connect MyFreeScoreNow
+        </h1>
+        <p className="text-muted-foreground">
+          Securely connect your MyFreeScoreNow account to pull your credit
+          snapshot into 3B Credit Builder.
         </p>
+      </header>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">First Name</label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">Last Name</label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Name */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
+          <Input label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
+        </div>
+
+        {/* Auth */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input type="email" label="Email" name="email" value={formData.email} onChange={handleChange} />
+          <Input type="password" label="Password" name="password" value={formData.password} onChange={handleChange} autoComplete="new-password" />
+        </div>
+
+        <Input label="Mobile" name="mobile" value={formData.mobile} onChange={handleChange} placeholder="5555551234" />
+        <Input label="Street Address" name="streetAddress1" value={formData.streetAddress1} onChange={handleChange} />
+
+        <div className="grid grid-cols-3 gap-4">
+          <Input label="City" name="city" value={formData.city} onChange={handleChange} />
+          <Input label="State" name="state" value={formData.state} onChange={handleChange} maxLength={2} />
+          <Input label="Zip" name="zip" value={formData.zip} onChange={handleChange} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Input label="SSN" name="ssn" value={formData.ssn} onChange={handleChange} autoComplete="off" />
+          <Input label="Date of Birth" name="dob" value={formData.dob} onChange={handleChange} placeholder="MM/DD/YYYY" autoComplete="off" />
+        </div>
+
+        {error && (
+          <div className="rounded-lg border border-red-800 bg-red-950/30 p-4 text-sm text-red-300">
+            {error}
           </div>
+        )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-          </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-full bg-neon-teal px-6 py-3 font-semibold text-black hover:brightness-110 disabled:opacity-50"
+        >
+          {loading ? "Starting enrollment…" : "Connect MyFreeScoreNow →"}
+        </button>
+      </form>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-200 mb-1">Mobile</label>
-            <input
-              type="tel"
-              name="mobile"
-              value={formData.mobile}
-              onChange={handleChange}
-              required
-              placeholder="5555551234"
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </div>
+      <p className="text-xs text-muted-foreground text-center">
+        Your information is encrypted and transmitted securely. 3B Credit Builder
+        does not store SSNs long-term.
+      </p>
+    </div>
+  );
+}
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-200 mb-1">Street Address</label>
-            <input
-              type="text"
-              name="streetAddress1"
-              value={formData.streetAddress1}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </div>
+/* ------------ helper ------------ */
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">City</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">State</label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                required
-                placeholder="WA"
-                maxLength={2}
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">Zip</label>
-              <input
-                type="text"
-                name="zip"
-                value={formData.zip}
-                onChange={handleChange}
-                required
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">SSN</label>
-              <input
-                type="text"
-                name="ssn"
-                value={formData.ssn}
-                onChange={handleChange}
-                required
-                placeholder="123456789"
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-1">Date of Birth</label>
-              <input
-                type="text"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                required
-                placeholder="MM/DD/YYYY"
-                className="w-full rounded-lg bg-slate-950 border border-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-red-950/30 border border-red-800 p-4 text-sm text-red-300">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 px-6 py-3.5 font-black text-black disabled:opacity-50"
-          >
-            {loading ? "Starting enrollment..." : "Connect MyFreeScoreNow →"}
-          </button>
-        </form>
-
-        <p className="text-xs text-slate-500 mt-6 text-center">
-          Your information is encrypted and sent securely to MyFreeScoreNow. 3B Credit Builder does not store your SSN long-term.
-        </p>
-      </div>
-    </main>
+function Input(props: any) {
+  const { label, ...rest } = props;
+  return (
+    <div>
+      <label className="block text-sm font-semibold mb-1">{label}</label>
+      <input
+        {...rest}
+        required
+        className="w-full rounded-lg bg-black/40 border border-white/10 px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-neon-teal"
+      />
+    </div>
   );
 }

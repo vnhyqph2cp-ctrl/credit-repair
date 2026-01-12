@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
-
-export default function PortalPage() {
-  redirect("/dashboard");
-  return null;
-}
+// pseudo-logic (NOT for today)
+if (!user) redirect("/login");
+if (!snapshotConnected) redirect("/dashboard/mfsn/enroll");
+if (!analyzerRun) redirect("/dashboard/analyzer");
+if (openEnforcement) redirect("/dashboard/enforcement");
+redirect("/dashboard");

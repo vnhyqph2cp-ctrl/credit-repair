@@ -1,12 +1,26 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   schemas  = ["auth", "public"]
+}
+
+
+
+  
+
+enum RoundStatus {
+  PENDING
+  SENT
+  AWAITING_RESPONSE
+  RESPONSE_RECEIVED
+  VIOLATION_DETECTED
+  CLOSED
+  
+  @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments

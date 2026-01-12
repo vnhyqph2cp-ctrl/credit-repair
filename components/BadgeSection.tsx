@@ -2,77 +2,126 @@
 
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import ProgressRing from "./ProgressRing";
+import { BadgeCard } from "@/components/BadgeCard";
+import ProgressRing from "@/components/ProgressRing";
+import { BadgeStatus } from "@/lib/badgeStatus";
 
-type Badge = {
+type BadgeApiItem = {
   key: string;
   title: string;
   description: string;
-  status: "earned" | "locked";
+  status: BadgeStatus;
+  explanation: string;
 };
 
 export default function BadgeSection() {
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badges, setBadges] = useState<BadgeApiItem[]>([]);
   const [progress, setProgress] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+    let mounted = true;
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+    async function loadBadges() {
+      try {
+        const supabase = createBrowserClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
 
-      if (!session) return;
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/badges`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
+        if (!session) {
+          throw new Error("Not authenticated");
         }
-      );
 
-      const json = await res.json();
-      setBadges(json.badges || []);
-      setProgress(json.progress?.percent ?? 0);
-      setLoading(false);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/badges`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error("Failed to load badge data");
+        }
+
+        const json = await res.json();
+
+        if (!mounted) return;
+
+        setBadges(json.badges ?? []);
+        setProgress(json.progress?.percent ?? 0);
+      } catch (err) {
+        console.error("BadgeSection error:", err);
+        if (mounted) {
+          setError("Unable to load progress at this time.");
+        }
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
+
+    loadBadges();
+    return () => {
+      mounted = false;
     };
-
-    load();
   }, []);
+
+  /* ---------------- loading ---------------- */
 
   if (loading) {
     return (
-      <div className="surface card glow-soft">
-        <p>Loading progress…</p>
-      </div>
+      <section className="rounded-3xl bg-glass-dark/90 shadow-glass backdrop-blur-xl ring-1 ring-white/10 p-6">
+        <p className="text-sm text-gray-400">Loading progress…</p>
+      </section>
     );
   }
 
+  /* ---------------- error ---------------- */
+
+  if (error) {
+    return (
+      <section className="rounded-3xl bg-glass-dark/90 shadow-glass backdrop-blur-xl ring-1 ring-white/10 p-6">
+        <p className="text-sm text-red-400">{error}</p>
+      </section>
+    );
+  }
+
+  /* ---------------- content ---------------- */
+
   return (
-    <section className="surface card col glow-soft">
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2>Your Progress</h2>
+    <section className="rounded-3xl bg-glass-black/90 shadow-glass backdrop-blur-2xl ring-1 ring-white/10 p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-white">
+            Progress & Achievements
+          </h2>
+          <p className="text-xs text-gray-400">
+            Milestones unlocked through verified activity
+          </p>
+        </div>
+
         <ProgressRing percent={progress} />
       </div>
 
-      <div className="row" style={{ flexWrap: "wrap", gap: 12 }}>
+      {/* Badges */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {badges.map((badge) => (
-          <div
+          <BadgeCard
             key={badge.key}
-            className={`badge-tile ${
-              badge.status === "earned" ? "earned" : "locked"
-            }`}
-          >
-            <strong>{badge.title}</strong>
-            <small>{badge.description}</small>
-          </div>
+            icon="🏅"
+            title={badge.title}
+            description={badge.description}
+            status={badge.status}
+            explanation={badge.explanation}
+          />
         ))}
       </div>
     </section>

@@ -1,55 +1,31 @@
-// lib/dashboard.ts
-import { createServerSupabaseClient } from "./supabase-server";
+// lib/dashboard/state.ts
 
-export type DashboardPlan = "basic" | "analyzer" | "welcome" | "ultimate";
+import { PlanTier } from "@/lib/stripe/pricing";
+
+/**
+ * Dashboard access & readiness state
+ * This does NOT load reports.
+ * It only determines availability and gating.
+ */
 
 export type DashboardState = {
-  hasReport: boolean;
-  plan: DashboardPlan;
-  report: {
-    score_tu: number | null;
-    score_eq: number | null;
-    score_ex: number | null;
-  } | null;
+  hasEpicReport: boolean;
+  hasAnalyzerResults: boolean;
+  plan: PlanTier;
 };
 
-export async function getDashboardState(customerId: string): Promise<DashboardState> {
-const supabase = await createServerSupabaseClient();
-
-
-  // Example: adjust table/column names to your DB
-  const { data: report, error } = await supabase
-    .from("Snapshot") // or whatever table holds the MFSN snapshot
-    .select("score_tu, score_eq, score_ex, plan")
-    .eq("customerId", customerId)
-    .order("createdAt", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    // Fail safe: treat as "no report yet" but don't leak details
-    return {
-      hasReport: false,
-      plan: "basic",
-      report: null,
-    };
-  }
-
-  if (!report) {
-    return {
-      hasReport: false,
-      plan: "basic",
-      report: null,
-    };
-  }
-
+/**
+ * TEMP implementation
+ * Real DB logic will replace this once:
+ * - Epic Report ingestion is finalized
+ * - Analyzer sessions are locked
+ */
+export async function getDashboardState(
+  _customerId: string
+): Promise<DashboardState> {
   return {
-    hasReport: true,
-    plan: (report.plan as DashboardPlan) ?? "basic",
-    report: {
-      score_tu: report.score_tu ?? null,
-      score_eq: report.score_eq ?? null,
-      score_ex: report.score_ex ?? null,
-    },
+    hasEpicReport: false,
+    hasAnalyzerResults: false,
+    plan: "basic",
   };
 }

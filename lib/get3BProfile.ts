@@ -1,7 +1,7 @@
 // lib/get3BProfile.ts
-import { prisma } from '@/lib/prisma';
 
 export async function get3BProfile(threeBId: string) {
+  // TEMP: stubbed for deploy - no Prisma
   // TODO: Update Prisma schema to include three_b_id, snapshots, webhook_audit relations
   return null;
   

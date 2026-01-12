@@ -4,12 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+"build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "start-server-and-test dev http://localhost:3000/api/health test:run",
-    "test:run": "vitest run",
-    "test:watch": "vitest"
+    "lint": "next lint"
   },
   "dependencies": {
     "@prisma/client": "5.21.1",

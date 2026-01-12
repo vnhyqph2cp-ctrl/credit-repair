@@ -1,58 +1,53 @@
-
 import React from "react";
 import clsx from "clsx";
 
-type AsProp<C extends React.ElementType> = {
-  as?: C;
-};
-
 type NeonButtonOwnProps = {
-  variant?: "primary" | "secondary";
-  color?: "teal" | "aqua" | "purple" | "pink";
-  size?: "md" | "lg";
-  children: React.ReactNode;
+  as?: React.ElementType;
+  variant?: "primary" | "secondary" | "ghost";
+  color?: "cyan" | "purple" | "green" | "yellow";
+  size?: "sm" | "md" | "lg";
   className?: string;
+  children?: React.ReactNode;
 };
 
-type NeonButtonProps<C extends React.ElementType> =
-  AsProp<C> &
+type NeonButtonProps<T extends React.ElementType = "button"> =
   NeonButtonOwnProps &
-  Omit<React.ComponentPropsWithoutRef<C>, keyof NeonButtonOwnProps | "as">;
+    Omit<React.ComponentPropsWithoutRef<T>, keyof NeonButtonOwnProps>;
 
-const defaultElement = "button";
+export const NeonButton = React.forwardRef<
+  HTMLElement,
+  NeonButtonProps
+>(function NeonButton(
+  {
+    as: Component = "button",
+    variant = "primary",
+    color = "cyan",
+    size = "md",
+    className,
+    children,
+    disabled,
+    ...props
+  },
+  ref
+) {
+  return (
+    <Component
+      ref={ref as any}
+      className={clsx(
+        "neon-btn",
+        `neon-btn-${variant}`,
+        `neon-btn-${color}`,
+        `neon-btn-${size}`,
+        disabled && "opacity-50 pointer-events-none",
+        className
+      )}
+      disabled={Component === "button" ? disabled : undefined}
+      {...props}
+    >
+      <span className="neon-btn-inner">{children}</span>
+      <span className="neon-btn-shimmer" aria-hidden />
+    </Component>
+  );
+});
 
-export const NeonButton = React.forwardRef(
-  <C extends React.ElementType = typeof defaultElement>(
-    {
-      as,
-      variant = "primary",
-      color = "teal",
-      size = "md",
-      className,
-      children,
-      ...props
-    }: NeonButtonProps<C>,
-    ref: React.Ref<any>
-  ) => {
-    const Component = as || defaultElement;
-    return (
-      <Component
-        ref={ref}
-        className={clsx(
-          "neon-btn",
-          `neon-btn-${variant}`,
-          `neon-btn-${color}`,
-          `neon-btn-${size}`,
-          className
-        )}
-        {...props}
-      >
-        <span className="neon-btn-inner">{children}</span>
-        <span className="neon-btn-shimmer" />
-      </Component>
-    );
-  }
-) as <C extends React.ElementType = typeof defaultElement>(
-  props: NeonButtonProps<C> & { ref?: React.Ref<any> }
-) => React.ReactElement | null;
 NeonButton.displayName = "NeonButton";
