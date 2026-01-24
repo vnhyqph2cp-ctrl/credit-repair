@@ -1,13 +1,16 @@
 ﻿import { NextResponse } from 'next/server';
 
-export async function POST() {
-  return NextResponse.json({ status: 'webhook route live' });
-}
-
 export async function GET() {
   return NextResponse.json(
-    { error: 'GET not allowed' },
-    { status: 405 }
+    { status: 'stripe webhook route alive (GET)' },
+    { status: 200 }
+  );
+}
+
+export async function POST() {
+  return NextResponse.json(
+    { status: 'stripe webhook route alive (POST)' },
+    { status: 200 }
   );
 }
 // app/api/stripe/webhook/route.ts
